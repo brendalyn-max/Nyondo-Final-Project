@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nyondo_Login</title>
+    <style>
+    /* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Body styling */
+body {
+    height: 100vh;
+    background: linear-gradient(135deg, #0a1f44, #0f2f6b);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Container */
+.container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Card */
+.card {
+    background: #ffffff;
+    width: 350px;
+    padding: 30px 25px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Header */
+.head {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.head h2 {
+    color: #0a1f44;
+    margin-bottom: 8px;
+}
+
+.head p {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+/* Form */
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Labels */
+label {
+    margin: 8px 0 5px;
+    font-size: 14px;
+    color: #333;
+}
+
+/* Inputs */
+input[type="text"],
+input[type="password"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    outline: none;
+    transition: 0.3s;
+}
+
+input:focus {
+    border-color: #0f2f6b;
+    box-shadow: 0 0 5px rgba(15, 47, 107, 0.3);
+}
+
+/* Checkbox */
+p {
+    margin: 10px 0;
+    font-size: 13px;
+    color: #555;
+}
+
+/* Button */
+button {
+    margin-top: 10px;
+    padding: 12px;
+    background: #0a1f44;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #0f2f6b;
+}
+
+/* Remove link styling from button wrapper */
+a {
+    text-decoration: none;
+}
+</style>
+        
+</head>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="head">
+                <h2>Welcome To Nyondo Hardware</h2>
+                <p>Smart Stock, Seamless Sale</p>
+            </div>
+            <div>
+                <form method="POST" action="{% url 'index' %}">
+                    {% csrf_token%}
+                    <label for="">Name</label>
+                    <input type="text" name="username" placeholder="full_name" required>
+                    <label for="">Password</label>
+                    <input type="password" name="password" placeholder="" required>
+                    <p><input type="checkbox" id="remember" name="remember">
+                        <label for="remember">Remember me. </label>
+                    </p>
+                    <button type="submit">Login</button>
+                    <!-- <a href="/home/"><button>Login</button></a> -->
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
