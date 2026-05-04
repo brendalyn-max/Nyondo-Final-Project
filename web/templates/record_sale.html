@@ -2,20 +2,64 @@
 {% block content %}
 <style>
     /* Tab Styling */
-    .tab-nav { display: flex; gap: 5px; margin-bottom: 20px; }
-    .tab-link { 
-        padding: 12px 25px; background: #ddd; text-decoration: none; 
-        color: #333; font-weight: bold; border-radius: 5px 5px 0 0; 
+    .tab-nav {
+        display: flex;
+        gap: 5px;
+        margin-bottom: 20px;
     }
-    .tab-link.active { background: #0a1f44; color: white; }
+
+    .tab-link {
+        padding: 12px 25px;
+        background: #ddd;
+        text-decoration: none;
+        color: #333;
+        font-weight: bold;
+        border-radius: 5px 5px 0 0;
+    }
+
+    .tab-link.active {
+        background: #0a1f44;
+        color: white;
+    }
 
     /* Layout Split */
-    .sales-container { display: flex; gap: 20px; align-items: flex-start; }
-    .form-panel { flex: 2; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-    .receipt-panel { flex: 1; background: white; padding: 20px; border: 2px dashed #0a1f44; border-radius: 8px; }
+    .sales-container {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+    }
 
-    label { display: block; margin: 10px 0 5px; font-weight: bold; color: #0a1f44; }
-    input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+    .form-panel {
+        flex: 2;
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .receipt-panel {
+        flex: 1;
+        background: white;
+        padding: 20px;
+        border: 2px dashed #0a1f44;
+        border-radius: 8px;
+    }
+
+    label {
+        display: block;
+        margin: 10px 0 5px;
+        font-weight: bold;
+        color: #0a1f44;
+    }
+
+    input,
+    select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
 </style>
 
 <h1>Record Sale</h1>
@@ -43,12 +87,17 @@
             <label>Product</label>
             <select name="item">
                 {% for item in items %}
-                <option value="{{ item.id }}">{{ item.name }} - UGX {{ item.selling_price }} (Stock: {{ item.quantity }})</option>
+                <option value="{{ item.id }}">
+                    {{ item.name }} - UGX {{ item.selling_price }} (Stock: {{ item.quantity }})
+                </option>
                 {% endfor %}
             </select>
 
             <div style="display:flex; gap:10px;">
-                <div style="flex:1;"><label>Quantity</label><input type="number" name="quantity" value="1" min="1"></div>
+                <div style="flex:1;">
+                    <label>Quantity</label>
+                    <input type="number" name="quantity" value="1" min="1">
+                </div>
                 <div style="flex:1;">
                     <label>Delivery Required?</label>
                     <select name="delivery">
@@ -58,27 +107,46 @@
                 </div>
             </div>
 
-            <button type="submit" style="background: #27ae60; color: white; width: 100%; padding: 15px; border: none; border-radius: 5px; font-weight: bold; margin-top: 20px; cursor: pointer;">
+            <label>Distance to Customer (KM)</label>
+            <input type="number" name="distance" placeholder="e.g. 5">
+            <small style="color:gray;">Only required if delivery is selected</small>
+
+            <button type="submit"
+                style="background: #27ae60; color: white; width: 100%; padding: 15px; border: none; border-radius: 5px; font-weight: bold; margin-top: 20px; cursor: pointer;">
                 Process Sale & Issue Receipt
             </button>
         </form>
     </div>
 
-    <!-- Receipt Preview Side (Matches your prototype) -->
+    <!-- Receipt Preview Side -->
     <div class="receipt-panel">
         <h3 style="text-align:center; color:#0a1f44; margin-top:0;">NYONDO HARDWARE</h3>
         <p style="text-align:center; font-size:12px;">Nansana, Wakiso | 0700-000000</p>
         <hr>
+
         {% if last_sale %}
-            <p><strong>Receipt #:</strong> REC-00{{ last_sale.id }}</p>
-            <p><strong>Type:</strong> {{ last_sale.sale_type }}</p>
-            <p><strong>Item:</strong> {{ last_sale.item.name }}</p>
-            <p><strong>Qty:</strong> {{ last_sale.quantity }}</p>
-            <hr>
-            <p style="font-size:18px;"><strong>TOTAL: UGX {{ last_sale.total_price }}</strong></p>
-            <p style="font-size:10px; color:gray;">{{ last_sale.date_sold }}</p>
+        <p><strong>Receipt #:</strong> REC-00{{ last_sale.id }}</p>
+        <p><strong>Type:</strong> {{ last_sale.sale_type }}</p>
+
+        <p><strong>Item:</strong> {{ last_sale.item.name }}</p>
+        <p><strong>Unit Price:</strong> UGX {{ last_sale.item.selling_price }}</p>
+
+        <p><strong>Qty:</strong> {{ last_sale.quantity }}</p>
+
+        <p><strong>Delivery Fee:</strong> UGX {{ last_sale.delivery_fee }}</p>
+
+        <p><strong>Distance:</strong> {{ last_sale.distance }} KM</p>
+
+        <hr>
+
+        <p style="font-size:18px;"><strong>TOTAL: UGX {{ last_sale.total_price }}</strong></p>
+
+        <p style="font-size:10px; color:gray;">{{ last_sale.date_sold }}</p>
+
         {% else %}
-            <p style="text-align:center; color:#999; padding:20px;">No recent sales to preview.</p>
+        <p style="text-align:center; color:#999; padding:20px;">
+            No recent sales to preview.
+        </p>
         {% endif %}
     </div>
 </div>

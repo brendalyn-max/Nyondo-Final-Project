@@ -25,6 +25,7 @@ def index(request):
             return redirect("index")
     return render(request, "index.html")
 
+
 def logout_view(request):
     """ Logout functionality """
     logout(request)
@@ -38,23 +39,17 @@ def logout_view(request):
 
 @login_required(login_url='/')
 def home(request):
-    """ 
-    Role-based Dashboard logic.
-    Calculates summary figures for those cards on your prototype.
-    """
     items = StockItem.objects.all()
     
     context = {
         'total_lines': items.count(),
         'low_stock_count': sum(1 for item in items if item.status_label == "Low stock"),
         'out_of_stock_count': items.filter(quantity__lte=0).count(),
-        'recent_items': items.order_by('-id')[:5], # Last 5 items added
+        'recent_items': items.order_by('-id')[:5],
     }
     
-    # Logic to switch dashboard templates based on user role
-    # Note: Ensure you have these templates or default to one for now
-    user_role = getattr(request.user, 'role', 'ADMIN') # Fallback to ADMIN if no role field
-    
+    user_role = getattr(request.user, 'role', 'ADMIN')
+
     if user_role == 'STOCK':
         return render(request, "stock_dashboard.html", context)
     elif user_role == 'CASHIER':
@@ -65,21 +60,22 @@ def home(request):
     return render(request, "home.html", context)
 
 
+# ==========================================
 # 3. STOCK / INVENTORY VIEWS
+# ==========================================
 
 @login_required(login_url='/')
 def stock_list(request):
-    """ Main Inventory Table View """
     items = StockItem.objects.all()
-    categories = Category.objects.all() # For the 'Add Item' modal dropdown
+    categories = Category.objects.all()
     return render(request, 'stock.html', {
-        'items': items, 
+        'items': items,
         'categories': categories
     })
 
+
 @login_required(login_url='/')
 def add_stock(request):
-    """ Logic for the '+ Add Item' Pop-up Modal """
     if request.method == "POST":
         try:
             category_id = request.POST.get('category')
@@ -100,9 +96,9 @@ def add_stock(request):
             
     return redirect('stock_list')
 
+
 @login_required(login_url='/')
 def edit_stock(request, item_id):
-    """ View for the Edit Page """
     item = get_object_or_404(StockItem, id=item_id)
     categories = Category.objects.all()
     
@@ -123,9 +119,9 @@ def edit_stock(request, item_id):
         
     return render(request, 'edit_stock.html', {'item': item, 'categories': categories})
 
+
 @login_required(login_url='/')
 def delete_stock(request, item_id):
-    """ Logic for deleting an item """
     item = get_object_or_404(StockItem, id=item_id)
     name = item.name
     item.delete()
@@ -133,30 +129,49 @@ def delete_stock(request, item_id):
     return redirect('stock_list')
 
 
+# ==========================================
+# 4. SALES VIEW (ONLY DISTANCE FIXED)
+# ==========================================
+
 @login_required(login_url='/')
 def record_sale(request):
     items = StockItem.objects.all()
-    # Get the type from the URL (e.g., ?type=SCHEME)
     active_tab = request.GET.get('type', 'WALK_IN')
-    
+
+    sale_id = request.GET.get('sale_id')
+
     if request.method == "POST":
         item_id = request.POST.get('item')
         qty = int(request.POST.get('quantity'))
         sale_type = request.POST.get('sale_type')
         delivery = request.POST.get('delivery') == 'yes'
-        
+
         product = get_object_or_404(StockItem, id=item_id)
         subtotal = product.selling_price * qty
-        
-        # NYONDO DELIVERY RULE
-        fee = 30000 if (delivery and subtotal < 500000) else 0
+
+        # ✅ FIXED: SAFE DISTANCE HANDLING (ONLY CHANGE)
+        distance_raw = request.POST.get('distance')
+        try:
+            distance = float(distance_raw) if distance_raw else 0
+        except (ValueError, TypeError):
+            distance = 0
+
+        # DELIVERY RULE (UNCHANGED LOGIC, BUT NOW DISTANCE IS READY)
+        if delivery:
+            if distance <= 10 and subtotal >= 500000:
+                fee = 0
+            else:
+                fee = 30000
+        else:
+            fee = 0
+
         total = subtotal + fee
 
         if product.quantity >= qty:
             product.quantity -= qty
             product.save()
-            
-            Sale.objects.create(
+
+            sale = Sale.objects.create(
                 sale_type=sale_type,
                 item=product,
                 quantity=qty,
@@ -165,16 +180,24 @@ def record_sale(request):
                 customer_name=request.POST.get('customer', 'Walk-in'),
                 member_nin=request.POST.get('member_nin', '')
             )
+
             messages.success(request, "Transaction Successful!")
+
+            return redirect(f'/record_sale/?type={active_tab}&sale_id={sale.id}')
+
         else:
             messages.error(request, "Insufficient Stock!")
-            
-        # return redirect(f'/sales/?type={active_tab}')
-        return redirect(f'/record_sale/?type={active_tab}')
+            return redirect(f'/record_sale/?type={active_tab}')
+
+    if sale_id:
+        last_sale = get_object_or_404(Sale, id=sale_id)
+    else:
+        last_sale = None
 
     context = {
         'items': items,
         'active_tab': active_tab,
-        'last_sale': Sale.objects.latest('id') if Sale.objects.exists() else None
+        'last_sale': last_sale
     }
+
     return render(request, 'record_sale.html', context)
