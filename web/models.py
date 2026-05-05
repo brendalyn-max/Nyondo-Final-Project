@@ -54,3 +54,27 @@ class Sale(models.Model):
 
     def __str__(self):
         return f"{self.sale_type} - {self.item.name}"
+
+
+# from django.db import models
+
+# Assuming Category and StockItem already exist above this line...
+
+class SalaryEarner(models.Model):
+    national_id_name = models.CharField(max_length=100)
+    nin_number = models.CharField(max_length=20, unique=True)
+    phone_number = models.CharField(max_length=15)
+    workplace = models.CharField(max_length=100, blank=True, null=True) # e.g. KCCA
+
+    def __str__(self):
+        return self.national_id_name
+
+class Deposit(models.Model):
+    salary_earner = models.ForeignKey(SalaryEarner, on_delete=models.CASCADE)
+    product = models.ForeignKey('StockItem', on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1) 
+    amount = models.DecimalField(max_digits=12, decimal_places=0)
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.salary_earner.national_id_name} - {self.amount}"

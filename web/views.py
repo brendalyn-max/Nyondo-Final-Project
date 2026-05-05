@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from django.db.models import Sum
 from django.contrib.auth.decorators import login_required
-from .models import StockItem, Category, Sale
+from .models import *
 
 # ==========================================
 # 1. AUTHENTICATION VIEWS
@@ -130,14 +131,13 @@ def delete_stock(request, item_id):
 
 
 # ==========================================
-# 4. SALES VIEW (ONLY DISTANCE FIXED)
+# 4. SALES VIEW
 # ==========================================
 
 @login_required(login_url='/')
 def record_sale(request):
     items = StockItem.objects.all()
     active_tab = request.GET.get('type', 'WALK_IN')
-
     sale_id = request.GET.get('sale_id')
 
     if request.method == "POST":
@@ -149,19 +149,14 @@ def record_sale(request):
         product = get_object_or_404(StockItem, id=item_id)
         subtotal = product.selling_price * qty
 
-        # ✅ FIXED: SAFE DISTANCE HANDLING (ONLY CHANGE)
         distance_raw = request.POST.get('distance')
         try:
             distance = float(distance_raw) if distance_raw else 0
         except (ValueError, TypeError):
             distance = 0
 
-        # DELIVERY RULE (UNCHANGED LOGIC, BUT NOW DISTANCE IS READY)
         if delivery:
-            if distance <= 10 and subtotal >= 500000:
-                fee = 0
-            else:
-                fee = 30000
+            fee = 0 if (distance <= 10 and subtotal >= 500000) else 30000
         else:
             fee = 0
 
@@ -180,24 +175,82 @@ def record_sale(request):
                 customer_name=request.POST.get('customer', 'Walk-in'),
                 member_nin=request.POST.get('member_nin', '')
             )
-
             messages.success(request, "Transaction Successful!")
-
             return redirect(f'/record_sale/?type={active_tab}&sale_id={sale.id}')
-
         else:
             messages.error(request, "Insufficient Stock!")
             return redirect(f'/record_sale/?type={active_tab}')
 
-    if sale_id:
-        last_sale = get_object_or_404(Sale, id=sale_id)
-    else:
-        last_sale = None
+    last_sale = get_object_or_404(Sale, id=sale_id) if sale_id else None
+    return render(request, 'record_sale.html', {'items': items, 'active_tab': active_tab, 'last_sale': last_sale})
 
-    context = {
-        'items': items,
-        'active_tab': active_tab,
-        'last_sale': last_sale
-    }
 
-    return render(request, 'record_sale.html', context)
+# ==========================================
+# 5. CREDIT SCHEME (DEPOSITS)
+# ==========================================
+
+@login_required(login_url='/')
+def credit_scheme(request):
+    if request.method == "POST":
+        if 'register_member' in request.POST:
+            nin = request.POST.get('nin')
+            if SalaryEarner.objects.filter(nin_number=nin).exists():
+                messages.error(request, f"NIN {nin} is already registered.")
+            else:
+                SalaryEarner.objects.create(
+                    national_id_name=request.POST.get('name'),
+                    nin_number=nin,
+                    phone_number=request.POST.get('phone'),
+                    workplace=request.POST.get('workplace')
+                )
+                messages.success(request, "Member registered successfully!")
+            
+        elif 'record_deposit' in request.POST:
+            earner = get_object_or_404(SalaryEarner, id=request.POST.get('earner_id'))
+            product = get_object_or_404(StockItem, id=request.POST.get('product_id'))
+            qty = int(request.POST.get('quantity', 1))
+
+            Deposit.objects.create(
+                salary_earner=earner,
+                product=product,
+                quantity=qty,
+                amount=request.POST.get('amount')
+            )
+            messages.success(request, "Deposit recorded!")
+            
+        return redirect('credit_scheme')
+
+    # Data Preparation
+    earners = SalaryEarner.objects.all()
+    stock_items = StockItem.objects.all()
+    progress_data = []
+
+    for earner in earners:
+        products_saved = Deposit.objects.filter(salary_earner=earner).values_list('product', flat=True).distinct()
+        for p_id in products_saved:
+            if not p_id: continue
+            
+            product = StockItem.objects.get(id=p_id)
+            total_saved = Deposit.objects.filter(salary_earner=earner, product_id=p_id).aggregate(Sum('amount'))['amount__sum'] or 0
+            
+            # Get quantity from the most recent deposit for this item
+            latest_dep = Deposit.objects.filter(salary_earner=earner, product_id=p_id).latest('id')
+            qty_intended = latest_dep.quantity
+
+            target_price = product.selling_price * qty_intended
+            percent = (total_saved / target_price * 100) if target_price > 0 else 0
+            
+            progress_data.append({
+                'earner': earner,
+                'product': product,
+                'qty': qty_intended,
+                'target': target_price,
+                'total': total_saved,
+                'progress': min(round(percent, 1), 100)
+            })
+
+    return render(request, 'deposits.html', {
+        'earners': earners,
+        'stock_items': stock_items,
+        'progress_data': progress_data
+    })
