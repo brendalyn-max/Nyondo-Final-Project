@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Stock Dashboard{% endblock %}
+{% block content %}
+<style>
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+
+    .stat-box {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<h1>Good morning, Stock</h1>
+<p>Stock overview for {{ today|date:"l, j M" }}</p>
+
+<div class="stats">
+    <div class="stat-box">
+        <h3>Total Product Lines</h3>
+        <p>{{ total_lines }}</p>
+    </div>
+    <div class="stat-box">
+        <h3>Low Stock</h3>
+        <p>{{ low_stock_count }}</p>
+    </div>
+    <div class="stat-box">
+        <h3>Out of Stock</h3>
+        <p>{{ out_of_stock_count }}</p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<style>
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+
+    .stat-box {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-box h3 {
+        margin: 0;
+        color: #0a1f44;
+    }
+</style>
+
+<h1>Good morning, Admin</h1>
+<p>Admin overview for {{ today|date:"l, j M" }}</p>
+
+<div class="stats">
+    <div class="stat-box">
+        <h3>Today’s Revenue</h3>
+        <p>UGX {{ todays_revenue }}</p>
+    </div>
+    <div class="stat-box">
+        <h3>Total Profit</h3>
+        <p>UGX {{ total_profit }}</p>
+    </div>
+    <div class="stat-box">
+        <h3>Low Stock Alerts</h3>
+        <p>{{ low_stock_count }}</p>
+    </div>
+    <div class="stat-box">
+        <h3>Supplier Debt</h3>
+        <p>UGX {{ supplier_debt }}</p>
+    </div>
+</div>
+{% endblock %}

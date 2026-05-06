@@ -1,7 +1,25 @@
 from django.contrib import admin
-from .models import Category, Supplier, StockItem, Sale
-# Register your models here.
+from django.contrib.auth.admin import UserAdmin
+from .models import CustomUser, Category, Supplier, StockItem, Sale, SalaryEarner
+
+class CustomUserAdmin(UserAdmin):
+    list_display = ('username', 'email', 'role', 'is_staff', 'is_active')
+    list_filter = ('role', 'is_staff', 'is_active')
+    search_fields = ('username', 'email')
+    ordering = ('username',)
+
+    fieldsets = UserAdmin.fieldsets + (
+        (None, {'fields': ('role',)}),   # ✅ only role
+    )
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        (None, {'fields': ('role',)}),   # ✅ only role
+    )
+
+# admin.site.register(CustomUser, CustomUserAdmin)
+
+admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Category)
 admin.site.register(Supplier)
 admin.site.register(StockItem)
 admin.site.register(Sale)
+admin.site.register(SalaryEarner)

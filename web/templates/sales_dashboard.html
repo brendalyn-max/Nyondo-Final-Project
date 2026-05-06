@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Sales Dashboard{% endblock %}
+{% block content %}
+<style>
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .stat-box {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-box h3 {
+        margin: 0;
+        color: #0a1f44;
+        font-size: 16px;
+    }
+
+    .stat-box p {
+        margin-top: 8px;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .section {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .section h3 {
+        margin-top: 0;
+        color: #0a1f44;
+    }
+
+    .btn {
+        display: inline-block;
+        background: #27ae60;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+</style>
+
+<h1>Sales Dashboard</h1>
+<p>{{ today|date:"l, j M" }}</p>
+
+<div class="stats">
+    <div class="stat-box">
+        <h3>My Sales Today</h3>
+        <p>{{ my_sales_today }} transactions</p>
+    </div>
+    <div class="stat-box">
+        <h3>My Revenue Today</h3>
+        <p>UGX {{ my_revenue_today }}</p>
+    </div>
+    <div class="stat-box">
+        <h3>Store Total Today</h3>
+        <p>UGX {{ store_total_today }}</p>
+    </div>
+    <div class="stat-box">
+        <h3>My All-Time Sales</h3>
+        <p>{{ my_all_time_sales }}</p>
+    </div>
+</div>
+
+<div class="section">
+    <h3>My Sales Today</h3>
+    {% if my_sales %}
+    <ul>
+        {% for sale in my_sales %}
+        <li>{{ sale.item.name }} — UGX {{ sale.total_price }}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No sales yet today</p>
+    {% endif %}
+</div>
+
+<div class="section">
+    <h3>Quick Action</h3>
+    <a href="{% url 'record_sale' %}" class="btn">Record a Sale</a>
+</div>
+{% endblock %}

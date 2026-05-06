@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.db.models import Sum
+from django.db.models import Sum, Count
 from django.contrib.auth.decorators import login_required
 from .models import *
 
@@ -59,6 +60,109 @@ def home(request):
         return render(request, "sales_dashboard.html", context)
         
     return render(request, "home.html", context)
+@login_required
+def admin_dashboard(request):
+    # Revenue and profit
+    today = timezone.now().date()
+    todays_sales = Sale.objects.filter(date_sold__date=today)
+    todays_revenue = todays_sales.aggregate(total=Sum('total_price'))['total'] or 0
+    # total_profit = Sale.objects.aggregate(profit=Sum('profit'))['profit'] or 0
+    all_sales = Sale.objects.all()
+    total_profit = sum(
+        sale.total_price - (sale.item.unit_cost * sale.quantity)
+        for sale in all_sales
+    )
+
+    # Stock alerts
+    low_stock_items = StockItem.objects.filter(quantity__lte=5, quantity__gt=0)
+    out_of_stock_items = StockItem.objects.filter(quantity=0)
+
+    # Supplier debt
+    supplier_debt = Supplier.objects.aggregate(total=Sum('credit'))['total'] or 0
+
+    # Scheme
+    scheme_members = SalaryEarner.objects.count()
+    scheme_savings = Deposit.objects.aggregate(total=Sum('amount'))['total'] or 0
+
+    context = {
+        'todays_revenue': todays_revenue,
+        'total_profit': total_profit,
+        'low_stock_count': low_stock_items.count(),
+        'supplier_debt': supplier_debt,
+        'stock_lines': StockItem.objects.count(),
+        'scheme_members': scheme_members,
+        'scheme_savings': scheme_savings,
+        'all_time_sales': Sale.objects.count(),
+        'recent_sales': Sale.objects.order_by('-date_sold')[:5],
+        'today': today
+    }
+    return render(request, 'admin_dashboard.html', context)
+
+
+@login_required
+def stock_dashboard(request):
+    today = timezone.now().date()
+    items = StockItem.objects.all()
+    low_stock_items = items.filter(quantity__lte=5, quantity__gt=0)
+    out_of_stock_items = items.filter(quantity=0)
+
+    context = {
+        'total_lines': items.count(),
+        'in_stock': items.filter(quantity__gt=5).count(),
+        'low_stock_count': low_stock_items.count(),
+        'out_of_stock_count': out_of_stock_items.count(),
+        'stock_value': items.aggregate(total=Sum('unit_cost'))['total'] or 0,
+        'total_units': items.aggregate(total=Sum('quantity'))['total'] or 0,
+        'low_stock_items': low_stock_items,
+        'today': today
+    }
+    return render(request, 'stock_dashboard.html', context)
+
+
+@login_required
+def sales_dashboard(request):
+    today = timezone.now().date()
+
+    # Sales recorded by the logged-in user today
+    my_sales_today = Sale.objects.filter(user=request.user, date_sold__date=today)
+
+    # All store sales today
+    store_sales_today = Sale.objects.filter(date_sold__date=today)
+
+    context = {
+        'my_sales_today': my_sales_today.count(),
+        'my_revenue_today': my_sales_today.aggregate(total=Sum('total_price'))['total'] or 0,
+        'store_total_today': store_sales_today.aggregate(total=Sum('total_price'))['total'] or 0,
+        'my_all_time_sales': Sale.objects.filter(user=request.user).count(),
+        'my_sales': my_sales_today,
+        'recent_sales': Sale.objects.filter(user=request.user).order_by('-date_sold')[:5],
+        'today': today,
+    }
+    return render(request, 'sales_dashboard.html', context)
+
+
+@login_required
+def cashier_dashboard(request):
+    today = timezone.now().date()
+    all_sales = Sale.objects.all()
+
+    total_revenue = all_sales.aggregate(total=Sum('total_price'))['total'] or 0
+    total_profit = sum(
+        sale.total_price - (sale.item.unit_cost * sale.quantity)
+        for sale in all_sales
+    )
+    supplier_credit = Supplier.objects.aggregate(total=Sum('credit'))['total'] or 0
+
+    context = {
+        'total_revenue': total_revenue,
+        'total_profit': total_profit,
+        'supplier_credit': supplier_credit,
+        'sales_log': all_sales.order_by('-date_sold')[:10],
+        # ✅ FIX: use salary_earner instead of earner
+        'scheme_summary': Deposit.objects.values('salary_earner__national_id_name').annotate(total=Sum('amount')),
+        'today': today
+    }
+    return render(request, 'cashier_dashboard.html', context)
 
 
 # ==========================================

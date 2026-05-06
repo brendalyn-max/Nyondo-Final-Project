@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Cashier Dashboard{% endblock %}
+{% block content %}
+<style>
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .stat-box {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-box h3 {
+        margin: 0;
+        color: #0a1f44;
+        font-size: 16px;
+    }
+
+    .stat-box p {
+        margin-top: 8px;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .section {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .section h3 {
+        margin-top: 0;
+        color: #0a1f44;
+    }
+</style>
+
+<h1>Cashier Dashboard</h1>
+<p>{{ today|date:"l, j M" }}</p>
+
+<div class="stats">
+    <div class="stat-box">
+        <h3>Total Revenue</h3>
+        <p>UGX {{ total_revenue }}</p>
+    </div>
+    <div class="stat-box">
+        <h3>Estimated Profit</h3>
+        <p>UGX {{ total_profit }}</p>
+    </div>
+    <div class="stat-box">
+        <h3>Supplier Credit Owed</h3>
+        <p>UGX {{ supplier_credit }}</p>
+    </div>
+</div>
+
+<div class="section">
+    <h3>Sales Log</h3>
+    {% if sales_log %}
+    <ul>
+        {% for sale in sales_log %}
+        <li>{{ sale.item.name }} — UGX {{ sale.total_price }} ({{ sale.date_sold }})</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No sales recorded yet</p>
+    {% endif %}
+</div>
+
+<div class="section">
+    <h3>Scheme Savings Summary</h3>
+    {% if scheme_summary %}
+    <ul>
+        {% for s in scheme_summary %}
+        <li>{{ s.earner__national_id_name }} — UGX {{ s.total }}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No deposits yet</p>
+    {% endif %}
+</div>
+{% endblock %}
