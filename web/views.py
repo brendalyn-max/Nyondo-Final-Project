@@ -13,7 +13,7 @@ from .models import *
 def index(request):
     """ Login Page View """
     if request.user.is_authenticated:
-        return redirect("home")
+        return redirect("admin_dashboard")
         
     if request.method == "POST":
         username = request.POST.get("username")
@@ -21,7 +21,7 @@ def index(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect("home")
+            return redirect("admin_dashboard")
         else:
             messages.error(request, "Invalid username or password")
             return redirect("index")
