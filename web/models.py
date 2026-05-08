@@ -7,22 +7,21 @@ class Category(models.Model):
         return self.name
 
 class Supplier(models.Model):
-    name = models.CharField(max_length=100)              # Supplier name
-    contact = models.CharField(max_length=100, blank=True, null=True)  # Phone/email
-    address = models.CharField(max_length=200, blank=True, null=True)  # Physical address
-    credit = models.DecimalField(max_digits=12, decimal_places=2, default=0)  # Outstanding credit/debt 
+    name = models.CharField(max_length=100)              
+    contact = models.CharField(max_length=100, blank=True, null=True) 
+    address = models.CharField(max_length=200, blank=True, null=True)  
+    credit = models.DecimalField(max_digits=12, decimal_places=2, default=0) 
     def __str__(self):
         return self.name
 
 class StockItem(models.Model):
     name = models.CharField(max_length=100)
-    # Using ForeignKey for Category so you can use a dropdown in forms
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     unit = models.CharField(max_length=20)
     quantity = models.IntegerField(default=0)
     unit_cost = models.DecimalField(max_digits=12, decimal_places=0)
     selling_price = models.DecimalField(max_digits=12, decimal_places=0)
-    reorder_level = models.IntegerField(default=5) # Trigger for "Low Stock"
+    reorder_level = models.IntegerField(default=5)
     specifications = models.TextField(blank=True, null=True)
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, related_name="items")
 
@@ -53,7 +52,7 @@ class Sale(models.Model):
     quantity = models.PositiveIntegerField()
     total_price = models.DecimalField(max_digits=12, decimal_places=0)
     customer_name = models.CharField(max_length=100, default="Walk-in")
-    member_nin = models.CharField(max_length=14, blank=True, null=True)  # For Scheme Tab
+    member_nin = models.CharField(max_length=14, blank=True, null=True)  
     delivery_fee = models.DecimalField(max_digits=10, decimal_places=0, default=0)
     date_sold = models.DateTimeField(auto_now_add=True)
     distance = models.FloatField(default=0.0)
@@ -62,10 +61,6 @@ class Sale(models.Model):
     def __str__(self):
         return f"{self.sale_type} - {self.item.name}"
 
-
-# from django.db import models
-
-# Assuming Category and StockItem already exist above this line...
 
 class SalaryEarner(models.Model):
     national_id_name = models.CharField(max_length=100)

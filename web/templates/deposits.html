@@ -60,7 +60,7 @@
         background: #0a1f44;
         height: 100%;
         border-radius: 5px;
-        transition: 0.3s;
+        transition: width 0.3s;
     }
 
     .badge-ready {
@@ -105,7 +105,7 @@
     <a href="#deposit">Record deposit</a>
 </div>
 
-<!-- REGISTER TAB -->
+<!-- REGISTER FORM -->
 <div id="register" class="tab-panel">
     <h3>Register Member</h3>
     <form method="POST">
@@ -122,7 +122,7 @@
     </form>
 </div>
 
-<!-- DEPOSIT TAB -->
+<!-- DEPOSIT FORM -->
 <div id="deposit" class="tab-panel">
     <h3>New Deposit</h3>
     <form method="POST">
@@ -151,7 +151,7 @@
     </form>
 </div>
 
-<!-- MEMBERS TAB -->
+<!-- MEMBERS  -->
 <div id="members" class="tab-panel">
     <input type="text" placeholder="Search members..." class="form-control" style="margin-bottom: 20px;">
     {% for d in progress_data %}

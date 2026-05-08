@@ -9,13 +9,11 @@ class CustomUserAdmin(UserAdmin):
     ordering = ('username',)
 
     fieldsets = UserAdmin.fieldsets + (
-        (None, {'fields': ('role',)}),   # ✅ only role
+        (None, {'fields': ('role',)}),  
     )
     add_fieldsets = UserAdmin.add_fieldsets + (
-        (None, {'fields': ('role',)}),   # ✅ only role
+        (None, {'fields': ('role',)}),   
     )
-
-# admin.site.register(CustomUser, CustomUserAdmin)
 
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Category)

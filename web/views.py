@@ -6,10 +6,8 @@ from django.db.models import Sum, Count
 from django.contrib.auth.decorators import login_required
 from .models import *
 
-# ==========================================
-# 1. AUTHENTICATION VIEWS
-# ==========================================
 
+# 1. authentication views
 def index(request):
     """ Login Page View """
     if request.user.is_authenticated:
@@ -34,10 +32,7 @@ def logout_view(request):
     messages.info(request, "You have been logged out.")
     return redirect("index")
 
-
-# ==========================================
-# 2. DASHBOARD / HOME VIEW
-# ==========================================
+# 2. main dashboard views
 
 @login_required(login_url='/')
 def home(request):
@@ -62,25 +57,20 @@ def home(request):
     return render(request, "home.html", context)
 @login_required
 def admin_dashboard(request):
-    # Revenue and profit
+    
     today = timezone.now().date()
     todays_sales = Sale.objects.filter(date_sold__date=today)
     todays_revenue = todays_sales.aggregate(total=Sum('total_price'))['total'] or 0
-    # total_profit = Sale.objects.aggregate(profit=Sum('profit'))['profit'] or 0
     all_sales = Sale.objects.all()
     total_profit = sum(
         sale.total_price - (sale.item.unit_cost * sale.quantity)
         for sale in all_sales
     )
 
-    # Stock alerts
+    # Stock alert on the dashboard
     low_stock_items = StockItem.objects.filter(quantity__lte=5, quantity__gt=0)
     out_of_stock_items = StockItem.objects.filter(quantity=0)
-
-    # Supplier debt
     supplier_debt = Supplier.objects.aggregate(total=Sum('credit'))['total'] or 0
-
-    # Scheme
     scheme_members = SalaryEarner.objects.count()
     scheme_savings = Deposit.objects.aggregate(total=Sum('amount'))['total'] or 0
 
@@ -122,11 +112,7 @@ def stock_dashboard(request):
 @login_required
 def sales_dashboard(request):
     today = timezone.now().date()
-
-    # Sales recorded by the logged-in user today
     my_sales_today = Sale.objects.filter(user=request.user, date_sold__date=today)
-
-    # All store sales today
     store_sales_today = Sale.objects.filter(date_sold__date=today)
 
     context = {
@@ -158,17 +144,11 @@ def cashier_dashboard(request):
         'total_profit': total_profit,
         'supplier_credit': supplier_credit,
         'sales_log': all_sales.order_by('-date_sold')[:10],
-        # ✅ FIX: use salary_earner instead of earner
         'scheme_summary': Deposit.objects.values('salary_earner__national_id_name').annotate(total=Sum('amount')),
         'today': today
     }
     return render(request, 'cashier_dashboard.html', context)
-
-
-# ==========================================
-# 3. STOCK / INVENTORY VIEWS
-# ==========================================
-
+# 3. stock management (add, edit, delete)
 @login_required(login_url='/')
 def stock_list(request):
     items = StockItem.objects.all()
@@ -233,10 +213,7 @@ def delete_stock(request, item_id):
     messages.warning(request, f"{name} has been removed from inventory.")
     return redirect('stock_list')
 
-
-# ==========================================
-# 4. SALES VIEW
-# ==========================================
+# 4. recording sales (walk-in and deliveries)
 
 @login_required(login_url='/')
 def record_sale(request):
@@ -288,10 +265,7 @@ def record_sale(request):
     last_sale = get_object_or_404(Sale, id=sale_id) if sale_id else None
     return render(request, 'record_sale.html', {'items': items, 'active_tab': active_tab, 'last_sale': last_sale})
 
-
-# ==========================================
-# 5. CREDIT SCHEME (DEPOSITS)
-# ==========================================
+# 5. credit scheme management views
 
 @login_required(login_url='/')
 def credit_scheme(request):
@@ -336,8 +310,6 @@ def credit_scheme(request):
             
             product = StockItem.objects.get(id=p_id)
             total_saved = Deposit.objects.filter(salary_earner=earner, product_id=p_id).aggregate(Sum('amount'))['amount__sum'] or 0
-            
-            # Get quantity from the most recent deposit for this item
             latest_dep = Deposit.objects.filter(salary_earner=earner, product_id=p_id).latest('id')
             qty_intended = latest_dep.quantity
 
