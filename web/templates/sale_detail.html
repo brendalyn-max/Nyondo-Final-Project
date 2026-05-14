@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="
+    max-width:600px;
+    margin:auto;
+    background:white;
+    padding:30px;
+    border:2px dashed #0a1f44;
+    border-radius:10px;
+">
+
+    <h2 style="text-align:center;">Sale Details</h2>
+    <hr>
+
+    <p><strong>Receipt:</strong> REC-00{{ sale.id }}</p>
+    <p><strong>Sale Type:</strong> {{ sale.sale_type }}</p>
+    <p><strong>Customer:</strong> {{ sale.customer_name }}</p>
+    <p><strong>Item:</strong> {{ sale.item.name }}</p>
+    <p><strong>Quantity:</strong> {{ sale.quantity }}</p>
+    <p><strong>Unit Price:</strong> UGX {{ sale.item.selling_price }}</p>
+    <p><strong>Delivery Fee:</strong> UGX {{ sale.delivery_fee }}</p>
+
+    <hr>
+
+    <h3>Total: UGX {{ sale.total_price }}</h3>
+
+    <p>{{ sale.date_sold }}</p>
+
+    <a href="{% url 'sales_today' %}"
+       style="
+           background:#0a1f44;
+           color:white;
+           padding:10px 20px;
+           text-decoration:none;
+           border-radius:5px;
+       ">
+       Back
+    </a>
+
+</div>
+
+{% endblock %}

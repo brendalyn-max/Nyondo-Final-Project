@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+
+<style>
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.card h3 {
+    margin: 0;
+    color: #0a1f44;
+}
+
+.card p {
+    font-size: 18px;
+    margin-top: 10px;
+    font-weight: bold;
+}
+</style>
+
+<h1>Business Reports</h1>
+<p>{{ today|date:"l, j M Y" }}</p>
+
+<div class="stats">
+
+    <div class="card">
+        <h3>Today's Revenue</h3>
+        <p>UGX {{ today_revenue }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Total Revenue</h3>
+        <p>UGX {{ total_revenue }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Total Profit</h3>
+        <p>UGX {{ total_profit }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Stock Value</h3>
+        <p>UGX {{ stock_value }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Low Stock Items</h3>
+        <p>{{ low_stock_count }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Out of Stock</h3>
+        <p>{{ out_of_stock_count }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Supplier Debt</h3>
+        <p>UGX {{ supplier_debt }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Scheme Savings</h3>
+        <p>UGX {{ scheme_savings }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Scheme Members</h3>
+        <p>{{ scheme_members }}</p>
+    </div>
+
+</div>
+
+{% endblock %}

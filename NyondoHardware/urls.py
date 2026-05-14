@@ -43,13 +43,21 @@ urlpatterns = [
     path('stock/delete/<int:item_id>/', views.delete_stock, name='delete_stock'),
 
     path('record_sale/', views.record_sale, name='record_sale'),
+    path('sales_today/', views.sales_today, name='sales_today'),
+    path('sale/<int:sale_id>/', views.sale_detail, name='sale_detail'),
     path('deposits/', views.credit_scheme, name='credit_scheme'),
 
     # Records
     # path('receipts/', views.receipts, name='receipts'),
-    # path('suppliers/', views.suppliers, name='suppliers'),
+    path('suppliers/', views.suppliers, name='suppliers'),
+    path("scheme_enrollees/", views.scheme_enrollees, name="scheme_enrollees"),
+    path("scheme_enrollees/edit/<int:pk>/", views.edit_enrollee, name="edit_enrollee"),
+    path("scheme_enrollees/delete/<int:pk>/", views.delete_enrollee, name="delete_enrollee"),
     # path('reports/', views.reports, name='reports'),
+    path('reports/', views.reports, name='reports'),
 
     # Admin tools
     # path('user_management/', views.user_management, name='user_management'),
+    path('users/', views.user_management, name='user_management'),
+    path('users/toggle/<int:user_id>/', views.toggle_user, name='toggle_user'),
 ]

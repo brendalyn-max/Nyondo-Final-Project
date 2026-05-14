@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}User Management{% endblock %}
+{% block content %}
+
+<style>
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+}
+
+th {
+    background: #0a1f44;
+    color: white;
+}
+
+.badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+.active { background: #27ae60; color: white; }
+.inactive { background: #e74c3c; color: white; }
+
+.btn {
+    padding: 6px 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 12px;
+    color: white;
+}
+
+.btn-disable { background: #e74c3c; }
+.btn-enable { background: #27ae60; }
+</style>
+
+<h1>User Management</h1>
+
+<table class="table">
+    <tr>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Status</th>
+        <th>Last Login</th>
+        <th>Action</th>
+    </tr>
+
+    {% for user in users %}
+    <tr>
+        <td>{{ user.username }}</td>
+        <td>{{ user.email }}</td>
+        <td>
+            {% if user.is_active %}
+                <span class="badge active">Active</span>
+            {% else %}
+                <span class="badge inactive">Disabled</span>
+            {% endif %}
+        </td>
+        <td>{{ user.last_login }}</td>
+        <td>
+            {% if user.is_active %}
+                <a href="{% url 'toggle_user' user.id %}" class="btn btn-disable">Disable</a>
+            {% else %}
+                <a href="{% url 'toggle_user' user.id %}" class="btn btn-enable">Enable</a>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

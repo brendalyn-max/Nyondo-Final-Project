@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+
 <style>
     .tab-nav {
         display: flex;
@@ -32,7 +33,7 @@
         background: white;
         padding: 30px;
         border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
 
     .receipt-panel {
@@ -58,9 +59,35 @@
         border-radius: 4px;
         box-sizing: border-box;
     }
+
+    .message {
+        padding: 12px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+
+    .success {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .error {
+        background: #f8d7da;
+        color: #721c24;
+    }
 </style>
 
 <h1>Record Sale</h1>
+
+<!-- Messages -->
+{% if messages %}
+    {% for message in messages %}
+        <div class="message {{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
 
 <div class="tab-nav">
     <a href="?type=WALK_IN" class="tab-link {% if active_tab == 'WALK_IN' %}active{% endif %}">Walk-In</a>
@@ -69,33 +96,37 @@
 </div>
 
 <div class="sales-container">
+
+    <!-- Form Panel -->
     <div class="form-panel">
         <form method="POST">
             {% csrf_token %}
             <input type="hidden" name="sale_type" value="{{ active_tab }}">
 
             {% if active_tab == 'SCHEME' %}
-            <label>Member NIN (For Verification)</label>
-            <input type="text" name="member_nin" placeholder="CM123456789..." required>
+                <label>Member NIN (For Verification)</label>
+                <input type="text" name="member_nin" placeholder="CM123456789..." required>
             {% else %}
-            <label>Customer Name</label>
-            <input type="text" name="customer" placeholder="Enter name or Leave for Walk-in">
+                <label>Customer Name</label>
+                <input type="text" name="customer" placeholder="Enter name or leave blank for Walk-in">
             {% endif %}
 
             <label>Product</label>
-            <select name="item">
+            <select name="item" required>
+                <option value="">Select Product</option>
                 {% for item in items %}
-                <option value="{{ item.id }}">
-                    {{ item.name }} - UGX {{ item.selling_price }} (Stock: {{ item.quantity }})
-                </option>
+                    <option value="{{ item.id }}">
+                        {{ item.name }} - UGX {{ item.selling_price }} (Stock: {{ item.quantity }})
+                    </option>
                 {% endfor %}
             </select>
 
-            <div style="display:flex; gap:10px;">
+            <div style="display:flex; gap:10px; margin-top:15px;">
                 <div style="flex:1;">
                     <label>Quantity</label>
-                    <input type="number" name="quantity" value="1" min="1">
+                    <input type="number" name="quantity" min="1" required>
                 </div>
+
                 <div style="flex:1;">
                     <label>Delivery Required?</label>
                     <select name="delivery">
@@ -110,7 +141,17 @@
             <small style="color:gray;">Only required if delivery is selected</small>
 
             <button type="submit"
-                style="background: #27ae60; color: white; width: 100%; padding: 15px; border: none; border-radius: 5px; font-weight: bold; margin-top: 20px; cursor: pointer;">
+                style="
+                    background: #27ae60;
+                    color: white;
+                    width: 100%;
+                    padding: 15px;
+                    border: none;
+                    border-radius: 5px;
+                    font-weight: bold;
+                    margin-top: 20px;
+                    cursor: pointer;
+                ">
                 Process Sale & Issue Receipt
             </button>
         </form>
@@ -118,34 +159,41 @@
 
     <!-- Receipt Preview -->
     <div class="receipt-panel">
-        <h3 style="text-align:center; color:#0a1f44; margin-top:0;">NYONDO HARDWARE</h3>
-        <p style="text-align:center; font-size:12px;">Nansana, Wakiso | 0700-000000</p>
+        <h3 style="text-align:center; color:#0a1f44; margin-top:0;">
+            NYONDO HARDWARE
+        </h3>
+
+        <p style="text-align:center; font-size:12px;">
+            Nansana, Wakiso | 0700-000000
+        </p>
+
         <hr>
 
         {% if last_sale %}
-        <p><strong>Receipt #:</strong> REC-00{{ last_sale.id }}</p>
-        <p><strong>Type:</strong> {{ last_sale.sale_type }}</p>
+            <p><strong>Receipt #:</strong> REC-00{{ last_sale.id }}</p>
+            <p><strong>Type:</strong> {{ last_sale.sale_type }}</p>
+            <p><strong>Item:</strong> {{ last_sale.item.name }}</p>
+            <p><strong>Unit Price:</strong> UGX {{ last_sale.item.selling_price }}</p>
+            <p><strong>Qty:</strong> {{ last_sale.quantity }}</p>
+            <p><strong>Delivery Fee:</strong> UGX {{ last_sale.delivery_fee }}</p>
 
-        <p><strong>Item:</strong> {{ last_sale.item.name }}</p>
-        <p><strong>Unit Price:</strong> UGX {{ last_sale.item.selling_price }}</p>
+            <hr>
 
-        <p><strong>Qty:</strong> {{ last_sale.quantity }}</p>
+            <p style="font-size:18px;">
+                <strong>TOTAL: UGX {{ last_sale.total_price }}</strong>
+            </p>
 
-        <p><strong>Delivery Fee:</strong> UGX {{ last_sale.delivery_fee }}</p>
-
-        <p><strong>Distance:</strong> {{ last_sale.distance }} KM</p>
-
-        <hr>
-
-        <p style="font-size:18px;"><strong>TOTAL: UGX {{ last_sale.total_price }}</strong></p>
-
-        <p style="font-size:10px; color:gray;">{{ last_sale.date_sold }}</p>
+            <p style="font-size:10px; color:gray;">
+                {{ last_sale.date_sold }}
+            </p>
 
         {% else %}
-        <p style="text-align:center; color:#999; padding:20px;">
-            No recent sales to preview.
-        </p>
+            <p style="text-align:center; color:#999; padding:20px;">
+                No recent sales to preview.
+            </p>
         {% endif %}
     </div>
+
 </div>
+
 {% endblock %}

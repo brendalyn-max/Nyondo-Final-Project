@@ -61,12 +61,30 @@ class Sale(models.Model):
     def __str__(self):
         return f"{self.sale_type} - {self.item.name}"
 
+class Item(models.Model):
+    name = models.CharField(max_length=50, unique=True)  # Cement, Iron Sheets, Iron Bars
+    price = models.DecimalField(max_digits=12, decimal_places=2)
 
+    def __str__(self):
+        return self.name
+    
 class SalaryEarner(models.Model):
     national_id_name = models.CharField(max_length=100)
     nin_number = models.CharField(max_length=20, unique=True)
     phone_number = models.CharField(max_length=15)
-    workplace = models.CharField(max_length=100, blank=True, null=True) # e.g. KCCA
+    workplace = models.CharField(max_length=100, blank=True, null=True)
+
+    # Scheme fields
+    target_product = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, blank=True)
+    target_quantity = models.PositiveIntegerField(default=1)
+    target_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    credit_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    @property
+    def progress(self):
+        if self.target_amount > 0:
+            return (self.credit_balance / self.target_amount) * 100
+        return 0
 
     def __str__(self):
         return self.national_id_name
@@ -82,13 +100,24 @@ class Deposit(models.Model):
         return f"{self.salary_earner.national_id_name} - {self.amount}"
 
 class CustomUser(AbstractUser):
+
     ROLE_CHOICES = [
         ('ADMIN', 'Admin'),
-        ('STOCK', 'Stock'),
+        ('STOCK', 'Stock Manager'),
         ('CASHIER', 'Cashier'),
-        ('SALES', 'Sales'),
+        ('SALES', 'Sales Person'),
     ]
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='ADMIN')
+
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        default='CASHIER'
+    )
+
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.username
+        return f"{self.username} ({self.role})"
+
+    
