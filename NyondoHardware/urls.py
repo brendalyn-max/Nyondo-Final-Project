@@ -22,9 +22,10 @@ from web import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', views.index, name='landing'),  # Landing page for unauthenticated users
     
       # Authentication
-    path('', views.index, name="index"),
+    path('index/', views.index, name="index"),
     path('logout/', views.logout_view, name="logout"),
 
     # Main dashboard (role-based redirect)
@@ -60,4 +61,5 @@ urlpatterns = [
     # path('user_management/', views.user_management, name='user_management'),
     path('users/', views.user_management, name='user_management'),
     path('users/toggle/<int:user_id>/', views.toggle_user, name='toggle_user'),
+    path('users/add/', views.add_user, name='add_user'),
 ]

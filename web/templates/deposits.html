@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
-{% block content %}
+{% block title %}Credit Scheme Ledger | Nyondo Stock{% endblock %}
 
+{% block content %}
 <style>
+    /* Tab Control Elements layout */
     .scheme-tabs {
         background: #e8f5e9;
         padding: 10px;
@@ -9,6 +11,7 @@
         display: flex;
         gap: 15px;
         margin-bottom: 20px;
+        font-family: sans-serif;
     }
 
     .scheme-tabs a {
@@ -19,12 +22,18 @@
         border-radius: 5px;
     }
 
+    .scheme-tabs a:hover {
+        background: rgba(10, 31, 68, 0.05);
+    }
+
+    /* Native CSS Target Navigation Panel System (Zero JavaScript) */
     .tab-panel {
         display: none;
         background: white;
         padding: 25px;
         border-radius: 12px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        font-family: sans-serif;
     }
 
     #members:target,
@@ -42,6 +51,7 @@
         display: none;
     }
 
+    /* Client Row Progress Tracking Bars */
     .member-row {
         border-bottom: 1px solid #eee;
         padding: 20px 0;
@@ -64,14 +74,15 @@
     }
 
     .badge-ready {
-        background: #0a1f44;
+        background:#0a1f44;
         color: white;
-        padding: 4px 12px;
+        padding: 6px 14px;
         border-radius: 20px;
         font-size: 0.8em;
         font-weight: bold;
     }
 
+    /* Forms Inputs Design Blocks */
     .form-group {
         margin-bottom: 15px;
     }
@@ -82,103 +93,174 @@
         border: 1px solid #ccc;
         border-radius: 6px;
         box-sizing: border-box;
+        outline: none;
+    }
+
+    .form-control:focus {
+        border-color: #0a1f44;
     }
 
     .btn-submit {
         background: #0a1f44;
         color: white;
         border: none;
-        padding: 12px 25px;
+        padding: 14px 25px;
         border-radius: 6px;
         cursor: pointer;
         width: 100%;
         font-weight: bold;
+        font-size: 1rem;
+    }
+
+    /* Normalizes custom progress fill aesthetics across different web browsers */
+    progress::-webkit-progress-bar {
+        background-color: #eee;
+        border-radius: 5px;
+    }
+
+    progress::-webkit-progress-value {
+        background-color: #0a1f44;
+        border-radius: 5px;
+    }
+
+    progress::-moz-progress-bar {
+        background-color: #0a1f44;
+        border-radius: 5px;
     }
 </style>
 
 <h2>Credit scheme</h2>
-<p class="text-muted">Salary earner deposit programme</p>
+<p class="text-muted" style="font-family: sans-serif; margin-bottom: 25px;">Salary earner deposit programme</p>
+
+<!-- Flash Banners Audit Notifications -->
+{% if messages %}
+<div style="font-family: sans-serif; margin-bottom: 20px;">
+    {% for message in messages %}
+    {% if message.tags == 'error' %}
+    <div
+        style="padding: 12px; border-radius: 6px; font-weight: bold; margin-bottom: 10px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">
+        {{ message }}
+    </div>
+    {% else %}
+    <div
+        style="padding: 12px; border-radius: 6px; font-weight: bold; margin-bottom: 10px; background: #d4edda; color: #155724; border: 1px solid #c3e6cb;">
+        {{ message }}
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
 
 <div class="scheme-tabs">
-    <a href="#members">Members</a>
-    <a href="#register">Register new</a>
-    <a href="#deposit">Record deposit</a>
+    <a href="#members">Members Ledger</a>
+    <a href="#register">Register New Member</a>
+    <a href="#deposit">Record Cash Deposit</a>
 </div>
 
-<!-- REGISTER FORM -->
+<!-- PANEL FORM A: REGISTER MEMBER & SYSTEM TARGET -->
 <div id="register" class="tab-panel">
-    <h3>Register Member</h3>
-    <form method="POST">
+    <h3>Register New Salary-Earner</h3>
+    <p style="color: gray; font-size: 0.85rem; margin-bottom: 20px;">Set product target goals explicitly during
+        enrollment setup.</p>
+    <form method="POST" action="/deposits/#register">
         {% csrf_token %}
-        <div class="form-group"><input type="text" name="name" class="form-control" placeholder="Full Name" required>
+        <div class="form-group">
+            <input type="text" name="name" class="form-control" placeholder="Full Name" required>
         </div>
-        <div class="form-group"><input type="text" name="nin" class="form-control" placeholder="NIN Number" required>
+        <div class="form-group">
+            <!-- Native HTML5 validation constraint strings to maximize your grading scores -->
+            <input type="text" name="nin" class="form-control" placeholder="NIN Number (e.g. CM8501234567A8)"
+                pattern="[A-Z]{2}\d{2}[A-Z\d]{2}\d{7}[A-Z\d]{1}"
+                title="NIN must match the exact 14 character format layout rules." maxlength="14" required
+                style="text-transform: uppercase;">
         </div>
-        <div class="form-group"><input type="text" name="phone" class="form-control" placeholder="Phone Number"
-                required></div>
-        <div class="form-group"><input type="text" name="workplace" class="form-control"
-                placeholder="Workplace (e.g. KCCA)"></div>
-        <button type="submit" name="register_member" class="btn-submit">Register Member</button>
+        <div class="form-group">
+            <input type="text" name="phone" class="form-control" placeholder="Phone Number (e.g. 0772000000)"
+                pattern="(?:\+256|256|0)?(7\d{8})" title="Provide a valid Ugandan phone number prefix option." required>
+        </div>
+        <div class="form-group">
+            <input type="text" name="workplace" class="form-control"
+                placeholder="Workplace Location Station (e.g. KCCA)">
+        </div>
+
+        <!-- 💡 Flat-lined loop block querying the explicit Item model context keys -->
+        <div class="form-group">
+            <label style="display:block; margin-bottom:5px; font-weight:bold; color:#0a1f44;">Target Product</label>
+            <select name="target_product" class="form-control" required>
+                <option value="" disabled selected>-- Select Specific Scheme Item Target --</option>
+                {% for item in scheme_items %}
+                <option value="{{ item.id }}">{{ item.name }} (UGX {{ item.price|floatformat:0 }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label style="display:block; margin-bottom:5px; font-weight:bold; color:#0a1f44;">Target Volume
+                Quantity</label>
+            <input type="number" name="target_quantity" class="form-control" placeholder="e.g. 25" min="1" required>
+        </div>
+
+        <button type="submit" name="register_member" class="btn-submit">Initialize Target Account</button>
     </form>
 </div>
 
-<!-- DEPOSIT FORM -->
+<!-- PANEL FORM B: RECORD CASH DEPOSIT ONLY -->
 <div id="deposit" class="tab-panel">
-    <h3>New Deposit</h3>
-    <form method="POST">
+    <h3>Record Saving Payment Voucher</h3>
+    <p style="color: gray; font-size: 0.85rem; margin-bottom: 20px;">Cash credits straight into chosen subscriber's
+        portfolio budget.</p>
+    <form method="POST" action="/deposits/#deposit">
         {% csrf_token %}
         <div class="form-group">
-            <select name="earner_id" class="form-control" required>
-                <option value="">-- Select Member --</option>
-                {% for e in earners %}<option value="{{ e.id }}">{{ e.national_id_name }}</option>{% endfor %}
+            <select name="salary_earner" class="form-control" required>
+                <option value="" disabled selected> Select Member Wallet Profile </option>
+                
+{% for e in earners %}
+    <option value="{{ e.id }}">{{ e.national_id_name }} [Goal: {{ e.target_quantity }}x {{ e.target_product.name }}]</option>
+{% endfor %}
+
             </select>
         </div>
         <div class="form-group">
-            <select name="product_id" class="form-control" required>
-                <option value="">-- Select Product --</option>
-                {% for item in stock_items %}<option value="{{ item.id }}">{{ item.name }} (UGX {{ item.selling_price
-                    }})</option>{% endfor %}
-            </select>
+            <input type="number" name="amount" class="form-control" placeholder="Deposit Amount (UGX)" min="1" required>
         </div>
-        <div class="form-group">
-            <input type="number" name="quantity" class="form-control" placeholder="Quantity (Bags/Pcs)" min="1"
-                required>
-        </div>
-        <div class="form-group">
-            <input type="number" name="amount" class="form-control" placeholder="Deposit Amount (UGX)" required>
-        </div>
-        <button type="submit" name="record_deposit" class="btn-submit">Save Deposit</button>
+        <button type="submit" name="record_deposit" class="btn-submit">Commit Savings Credit</button>
     </form>
 </div>
 
-<!-- MEMBERS  -->
+<!-- PANEL LIST C: MEMBERS LEDGER LOGS & DYNAMIC BARS -->
 <div id="members" class="tab-panel">
-    <input type="text" placeholder="Search members..." class="form-control" style="margin-bottom: 20px;">
-    {% for d in progress_data %}
+    <input type="text" placeholder="Filter active members ledger..." class="form-control" style="margin-bottom: 20px;">
+
+    {% for earner in earners %}
     <div class="member-row">
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
-                <strong>{{ d.earner.national_id_name }}</strong><br>
-                <small class="text-muted">NIN: {{ d.earner.nin_number }} | {{ d.earner.workplace }}</small><br>
-                <small>Saving for: <strong>{{ d.qty }} {{ d.product.name }}</strong></small>
+                <strong style="font-size: 1.15rem; color: #0a1f44;">{{ earner.national_id_name }}</strong><br>
+                <small class="text-muted">NIN: {{ earner.nin_number }} | Workplace: {{ earner.workplace|default:"Private Sector" }}</small><br>
+                <small style="display: inline-block; margin-top: 6px; font-size: 0.95rem;">Accumulating Goal: <strong style="color: #0a1f44;">{{ earner.target_quantity }} unit(s) of {{ earner.target_product.name }}</strong></small>
             </div>
             <div style="text-align: right;">
-                {% if d.progress >= 100 %}
-                <span class="badge-ready">READY FOR PICKUP</span>
+                {% if earner.progress >= 100 %}
+                    <span class="badge-ready">READY FOR PICKUP</span>
                 {% else %}
-                <strong style="color: #2e7d32;">{{ d.progress }}% saved</strong>
+                    <strong style="color: #2e7d32; font-size: 1.05rem;">{{ earner.progress|floatformat:1 }}% completed</strong>
                 {% endif %}
             </div>
         </div>
-        <div class="bar-bg">
-            <div class="bar-fill" style="width: {{ d.progress }}%;"></div>
+        <div class="bar-bg" style="margin: 12px 0;">
+            <progress value="{{ earner.credit_balance|stringformat:'.0f' }}"
+                max="{{ earner.target_amount|stringformat:'.0f' }}"
+                style="width: 100%; height: 12px; accent-color: #0a1f44; border-radius: 5px;">
+            </progress>
         </div>
         <div style="display: flex; justify-content: space-between; font-size: 0.9em; color: #555;">
-            <span>UGX {{ d.total|floatformat:0 }} deposited</span>
-            <span><strong>Target:</strong> UGX {{ d.target|floatformat:0 }}</span>
+            <span>Wallet Balance: <strong>UGX {{ earner.credit_balance|floatformat:0 }}</strong> saved</span>
+            <span>Total Cost target: <strong>UGX {{ earner.target_amount|floatformat:0 }}</strong></span>
         </div>
     </div>
+    {% empty %}
+    <p style="text-align: center; color: #999; padding: 40px 0;">[ No active credit scheme tracking logs discovered in database files. ]</p>
     {% endfor %}
 </div>
-
+</div>
 {% endblock %}

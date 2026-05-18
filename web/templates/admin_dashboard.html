@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{%load humanize %}
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
@@ -7,8 +8,6 @@
     .dashboard {
         padding: 20px;
     }
-
-    /* KPI GRID */
     .stats {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -41,8 +40,6 @@
         margin-top: 8px;
         color: #0a1f44;
     }
-
-    /* ACTIONS */
     .actions {
         display: flex;
         gap: 10px;
@@ -63,7 +60,6 @@
     .btn-blue { background: #0a1f44; }
     .btn-orange { background: #f39c12; }
 
-    /* PANELS */
     .grid {
         display: grid;
         grid-template-columns: 2fr 1fr;
@@ -82,7 +78,6 @@
         color: #0a1f44;
     }
 
-    /* ALERT */
     .alert {
         padding: 12px;
         border-radius: 6px;
@@ -95,7 +90,6 @@
         color: #721c24;
     }
 
-    /* RECENT SALES */
     .sale-item {
         padding: 10px 0;
         border-bottom: 1px solid #eee;
@@ -109,17 +103,19 @@
 </style>
 
 <div class="dashboard">
-
-    <!-- KPI STATS -->
+        <div class="dashboard-header">
+            <h1>Admin Dashboard</h1>
+            <p>Welcome back, {{ request.user.username }}! Here's an overview of today's performance.</p>
+        </div>
     <div class="stats">
         <div class="stat-box">
             <h3>Today's Revenue</h3>
-            <p>UGX {{ todays_revenue }}</p>
+            <p>UGX {{ todays_revenue|floatformat:2 |intcomma }}</p>
         </div>
 
         <div class="stat-box">
             <h3>Total Profit</h3>
-            <p>UGX {{ total_profit }}</p>
+            <p>UGX {{ total_profit|floatformat:2 |intcomma }}</p>
         </div>
 
         <div class="stat-box">
@@ -129,18 +125,18 @@
 
         <div class="stat-box">
             <h3>Supplier Debt</h3>
-            <p>UGX {{ supplier_debt }}</p>
+            <p>UGX {{ supplier_debt|floatformat:2 |intcomma }}</p>
         </div>
     </div>
 
-    <!-- QUICK ACTIONS -->
+    
     <div class="actions">
         <a href="{% url 'record_sale' %}" class="btn btn-green">+ Record Sale</a>
         <a href="{% url 'sales_today' %}" class="btn btn-blue">Today's Sales</a>
         <a href="{% url 'stock_list' %}" class="btn btn-orange">Manage Stock</a>
     </div>
 
-    <!-- MAIN GRID -->
+
     <div class="grid">
 
         <!-- RECENT SALES -->
@@ -151,23 +147,22 @@
                 <div class="sale-item">
                     <strong>REC-00{{ sale.id }}</strong> —
                     {{ sale.item.name }} —
-                    UGX {{ sale.total_price }}
+                    UGX {{ sale.total_price|floatformat:2 |intcomma }}
                 </div>
             {% empty %}
                 <p>No sales recorded yet.</p>
             {% endfor %}
         </div>
 
-        <!-- ALERTS -->
         <div class="panel">
             <h3>Alerts</h3>
 
             {% if low_stock_count > 0 %}
                 <div class="alert alert-danger">
-                    ⚠ {{ low_stock_count }} low stock item(s)
+                    {{ low_stock_count }} low stock item(s)
                 </div>
             {% else %}
-                <p>All stock levels are healthy ✅</p>
+                <p>All stock levels are healthy </p>
             {% endif %}
 
             {% if out_of_stock_count > 0 %}
@@ -178,10 +173,10 @@
 
             {% if supplier_debt > 0 %}
                 <div class="alert alert-danger">
-                    ⚠ Supplier debt of UGX {{ supplier_debt }}
+                    ⚠ Supplier debt of UGX {{ supplier_debt|floatformat:2 |intcomma }}
                 </div>
             {% else %}
-                <p>No outstanding supplier debts ✅</p>
+                <p>No outstanding supplier debts </p>
             {% endif %}
 
              {% if recent_sales|length == 0 %}

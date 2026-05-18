@@ -1,7 +1,9 @@
 {% extends "base.html" %}
-{% block content %}
+{% block title %}Record Sale | Nyondo Hardware{% endblock %}
 
+{% block content %}
 <style>
+    /* Tab Navigation Layout */
     .tab-nav {
         display: flex;
         gap: 5px;
@@ -15,6 +17,7 @@
         color: #333;
         font-weight: bold;
         border-radius: 5px 5px 0 0;
+        transition: background 0.2s, color 0.2s;
     }
 
     .tab-link.active {
@@ -22,6 +25,7 @@
         color: white;
     }
 
+    /* Core Panel Containers */
     .sales-container {
         display: flex;
         gap: 20px;
@@ -36,19 +40,25 @@
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
 
+    /* Standardized Corporate Invoice Design */
     .receipt-panel {
-        flex: 1;
-        background: white;
-        padding: 20px;
-        border: 2px dashed #0a1f44;
-        border-radius: 8px;
+        flex: 1.2;
+        background: #fffdf7;
+        padding: 25px;
+        border: 1px solid #ddd;
+        border-top: 8px solid #0a1f44;
+        border-radius: 4px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        font-family: 'Courier New', Courier, monospace;
     }
 
+    /* Form Fields Styling */
     label {
         display: block;
         margin: 10px 0 5px;
         font-weight: bold;
         color: #0a1f44;
+        font-family: sans-serif;
     }
 
     input,
@@ -58,29 +68,47 @@
         border: 1px solid #ddd;
         border-radius: 4px;
         box-sizing: border-box;
+        outline: none;
+        font-family: sans-serif;
     }
 
+    input:focus, select:focus {
+        border-color: #0a1f44;
+    }
+
+    /* Flash Message Blocks */
     .message {
         padding: 12px;
         margin-bottom: 15px;
         border-radius: 5px;
         font-weight: bold;
+        font-family: sans-serif;
     }
 
     .success {
         background: #d4edda;
         color: #155724;
+        border: 1px solid #c3e6cb;
     }
 
     .error {
         background: #f8d7da;
         color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    /* Receipt Typography Utility */
+    .receipt-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 14px;
     }
 </style>
 
-<h1>Record Sale</h1>
+<h1 style="font-family: sans-serif;">Record Sale</h1>
 
-<!-- Messages -->
+<!-- System Audit Messages Feedback Layer -->
 {% if messages %}
     {% for message in messages %}
         <div class="message {{ message.tags }}">
@@ -89,6 +117,7 @@
     {% endfor %}
 {% endif %}
 
+<!-- Segment Navigation Options -->
 <div class="tab-nav">
     <a href="?type=WALK_IN" class="tab-link {% if active_tab == 'WALK_IN' %}active{% endif %}">Walk-In</a>
     <a href="?type=WHOLESALE" class="tab-link {% if active_tab == 'WHOLESALE' %}active{% endif %}">Wholesale</a>
@@ -97,15 +126,18 @@
 
 <div class="sales-container">
 
-    <!-- Form Panel -->
+    <!-- Operational Inputs Panel Form -->
     <div class="form-panel">
-        <form method="POST">
+        <form method="POST" action="?type={{ active_tab }}">
             {% csrf_token %}
             <input type="hidden" name="sale_type" value="{{ active_tab }}">
 
             {% if active_tab == 'SCHEME' %}
                 <label>Member NIN (For Verification)</label>
-                <input type="text" name="member_nin" placeholder="CM123456789..." required>
+                <input type="text" name="member_nin" placeholder="e.g. CM8501234567A8" 
+                       pattern="[A-Z]{2}\d{2}[A-Z\d]{2}\d{7}[A-Z\d]{1}" 
+                       title="NIN must follow the official NIRA format containing exactly 14 characters." 
+                       maxlength="14" required style="text-transform: uppercase;">
             {% else %}
                 <label>Customer Name</label>
                 <input type="text" name="customer" placeholder="Enter name or leave blank for Walk-in">
@@ -113,7 +145,7 @@
 
             <label>Product</label>
             <select name="item" required>
-                <option value="">Select Product</option>
+                <option value="" disabled selected>-- Select Product from Inventory --</option>
                 {% for item in items %}
                     <option value="{{ item.id }}">
                         {{ item.name }} - UGX {{ item.selling_price }} (Stock: {{ item.quantity }})
@@ -124,7 +156,7 @@
             <div style="display:flex; gap:10px; margin-top:15px;">
                 <div style="flex:1;">
                     <label>Quantity</label>
-                    <input type="number" name="quantity" min="1" required>
+                    <input type="number" name="quantity" min="1" required placeholder="1">
                 </div>
 
                 <div style="flex:1;">
@@ -137,8 +169,8 @@
             </div>
 
             <label>Distance to Customer (KM)</label>
-            <input type="number" name="distance" placeholder="e.g. 5">
-            <small style="color:gray;">Only required if delivery is selected</small>
+            <input type="number" name="distance" placeholder="e.g. 5.5" step="0.1" min="0">
+            <small style="color:gray; display: block; margin-top: 4px; font-family: sans-serif;">Leave blank or enter 0 if delivery is not required</small>
 
             <button type="submit"
                 style="
@@ -151,49 +183,77 @@
                     font-weight: bold;
                     margin-top: 20px;
                     cursor: pointer;
-                ">
-                Process Sale & Issue Receipt
+                    font-size: 1rem;
+                    transition: background 0.2s;
+                    font-family: sans-serif;
+                "
+                onmouseover="this.style.background='#219653'"
+                onmouseout="this.style.background='#27ae60'">
+                Process Sale &amp; Issue Receipt
             </button>
         </form>
     </div>
 
-    <!-- Receipt Preview -->
+    <!-- 🧾 Standardized Corporate Invoice Ticket Box View -->
     <div class="receipt-panel">
-        <h3 style="text-align:center; color:#0a1f44; margin-top:0;">
-            NYONDO HARDWARE
+        <h3 style="text-align:center; color:#0a1f44; margin-top:0; font-family: sans-serif; font-weight: 800; letter-spacing: 1px;">
+            NYONDO GENERAL HARDWARE LTD
         </h3>
-
-        <p style="text-align:center; font-size:12px;">
-            Nansana, Wakiso | 0700-000000
+        <p style="text-align:center; font-size:12px; color: #555; margin-bottom: 5px;">
+            Nansana, Hoima Road, Wakiso
+        </p>
+        <p style="text-align:center; font-size:12px; color: #555;">
+            Tel: +256 700 000000
         </p>
 
-        <hr>
+        <div style="border-top: 1px dashed #333; margin: 15px 0;"></div>
 
         {% if last_sale %}
-            <p><strong>Receipt #:</strong> REC-00{{ last_sale.id }}</p>
-            <p><strong>Type:</strong> {{ last_sale.sale_type }}</p>
-            <p><strong>Item:</strong> {{ last_sale.item.name }}</p>
-            <p><strong>Unit Price:</strong> UGX {{ last_sale.item.selling_price }}</p>
-            <p><strong>Qty:</strong> {{ last_sale.quantity }}</p>
-            <p><strong>Delivery Fee:</strong> UGX {{ last_sale.delivery_fee }}</p>
+            <div class="receipt-row"><strong>Receipt No:</strong> <span>REC-2026-{{ last_sale.id }}</span></div>
+            <div class="receipt-row"><strong>Date/Time:</strong> <span>{{ last_sale.date_sold|date:"d M Y H:i" }}</span></div>
+            <div class="receipt-row"><strong>Served By:</strong> <span>{{ last_sale.user.username|default:"System" }}</span></div>
+            <div class="receipt-row"><strong>Sale Type:</strong> <span>{{ last_sale.sale_type }}</span></div>
+            <div class="receipt-row"><strong>Customer:</strong> <span>{{ last_sale.customer_name }}</span></div>
+            {% if last_sale.member_nin %}
+                <div class="receipt-row"><strong>Member NIN:</strong> <span>{{ last_sale.member_nin }}</span></div>
+            {% endif %}
 
-            <hr>
+            <div style="border-top: 1px dashed #333; margin: 15px 0;"></div>
 
-            <p style="font-size:18px;">
-                <strong>TOTAL: UGX {{ last_sale.total_price }}</strong>
-            </p>
+            <div class="receipt-row" style="font-weight: bold;">
+                <span>Item Description</span>
+                <span>Qty x Price</span>
+            </div>
+            
+            <div class="receipt-row" style="margin-top: 5px; margin-bottom: 12px;">
+                <span>{{ last_sale.item.name }}</span>
+                <span>{{ last_sale.quantity }} x {{ last_sale.item.selling_price }}</span>
+            </div>
 
-            <p style="font-size:10px; color:gray;">
-                {{ last_sale.date_sold }}
-            </p>
+            <div style="border-top: 1px dashed #333; margin: 15px 0;"></div>
+
+            <!-- Logistics and Pricing Summary Layout Metrics -->
+            <div class="receipt-row"><strong>Delivery Status:</strong> <span>{% if last_sale.delivery_fee > 0 or last_sale.distance > 0 %}Yes{% else %}No{% endif %}</span></div>
+            <div class="receipt-row"><strong>Distance:</strong> <span>{{ last_sale.distance }} KM</span></div>
+            <div class="receipt-row"><strong>Transport Charge:</strong> <span>UGX {{ last_sale.delivery_fee }}</span></div>
+
+            <div style="border-top: 2px solid #333; margin: 15px 0;"></div>
+
+            <div class="receipt-row" style="font-size: 18px; font-weight: bold; color: #0a1f44;">
+                <span>GRAND TOTAL:</span>
+                <span>UGX {{ last_sale.total_price }}</span>
+            </div>
+
+            <div style="border-top: 2px solid #333; margin: 15px 0;"></div>
+            <p style="text-align: center; font-size: 12px; font-weight: bold; margin-top: 15px;">THANK YOU FOR YOUR BUSINESS</p>
+            <p style="text-align: center; font-size: 11px; color: gray;">Building Uganda Together</p>
 
         {% else %}
-            <p style="text-align:center; color:#999; padding:20px;">
-                No recent sales to preview.
+            <p style="text-align:center; color:#999; padding:60px 20px; font-size: 14px;">
+                [ Waiting for completed sales transaction logs to preview invoice receipt ticket... ]
             </p>
         {% endif %}
     </div>
 
 </div>
-
 {% endblock %}

@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Nyondo Hardware{% endblock %}</title>
     <!-- Font Awesome for icons -->
     <link
@@ -17,7 +18,7 @@
         display: flex;
       }
 
-      /* Sidebar Styling */
+      /* Sidebar Core Architecture (Repaired Flex Constraints) */
       .sidebar {
         width: 250px;
         background: #0a1f44;
@@ -26,6 +27,7 @@
         position: fixed;
         display: flex;
         flex-direction: column;
+        z-index: 500;
       }
 
       .sidebar h2 {
@@ -34,20 +36,34 @@
         border-bottom: 1px solid #1a3a6d;
         margin: 0;
         color: white;
+        font-size: 1.25rem;
+        font-weight: 800;
+        letter-spacing: 0.5px;
       }
 
+      /* Allows navigation scrolling if menu choices expand over page height limits */
       .sidebar nav {
         flex-grow: 1;
+        overflow-y: auto;
+        padding-top: 10px;
       }
 
       .sidebar a {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
         color: #a5b1c2;
-        padding: 10px 20px;
+        padding: 12px 20px;
         text-decoration: none;
-        transition: 0.3s;
+        transition: background 0.2s, color 0.2s;
+        font-size: 0.92rem;
+        font-weight: 600;
+      }
+
+      .sidebar a i {
+        width: 20px;
+        text-align: center;
+        font-size: 1.05rem;
       }
 
       .sidebar a:hover,
@@ -57,17 +73,29 @@
         border-left: 4px solid #27ae60;
       }
 
-      /* Pin logout at bottom */
+      /* Re-stabilized Logout baseline anchor pin at bottom layout margin */
       .logout {
         margin-top: auto;
-        padding: 20px;
         border-top: 1px solid #1a3a6d;
+        background: #071630;
+      }
+      .logout a {
+        color: #eb4d4b;
+        border-left: 4px solid transparent;
+      }
+      .logout a:hover {
+        background: #eb4d4b;
+        color: white;
+        border-left: 4px solid #ffffff;
       }
 
-      /* Main Layout */
+      /* Main Screen Panel Configurations */
       .main-container {
         flex-grow: 1;
         margin-left: 250px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
       }
 
       .topbar {
@@ -76,14 +104,19 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #2c3e50;
       }
 
       .content {
         padding: 30px;
+        flex-grow: 1;
       }
 
-      /* Modal Styles */
+      /* Pure CSS Modal Target Layer Engines (Zero JavaScript) */
       .modal {
         display: none;
         position: fixed;
@@ -105,130 +138,95 @@
         background: white;
         padding: 30px;
         border-radius: 8px;
-        width: 400px;
+        width: 440px;
         position: relative;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
       }
 
       .close {
         position: absolute;
         right: 20px;
-        top: 10px;
+        top: 15px;
         font-size: 24px;
         text-decoration: none;
-        color: #333;
+        color: #64748b;
+        font-weight: bold;
+        transition: color 0.2s;
+      }
+      .close:hover {
+        color: #0f172a;
       }
     </style>
   </head>
 
   <body>
+    <!-- Main Left Global Navigation Panel -->
     <div class="sidebar">
-      <div>
-        <h2>Nyondo General Hardware</h2>
-        <nav>
-          {% if user.role == "ADMIN" %}
-          <a href="{% url 'admin_dashboard' %}"
-            ><i class="fas fa-user-shield"></i> Admin Dashboard</a
-          >
-          <a href="{% url 'credit_scheme' %}"
-            ><i class="fas fa-piggy-bank"></i> Deposits</a
-          >
-          <a
-            href="{% url 'scheme_enrollees' %}"
-            style="display: flex; align-items: center; gap: 10px"
-          >
-            <i class="fas fa-users"></i>
-            <span>Credit Scheme List</span>
-          </a>
-          <a href="{% url 'record_sale' %}"
-            ><i class="fas fa-receipt"></i> Record Sale</a
-          >
-          <a href="{% url 'suppliers' %}"
-            ><i class="fas fa-truck"></i> Suppliers</a
-          >
-          <a href="{% url 'sales_today' %}"
-            ><i class="fas fa-chart-line"></i>Today's Sales</a
-          >
-          <a href="{% url 'stock_list' %}"
-            ><i class="fas fa-clipboard-list"></i> Stock Inventory</a
-          >
-          <a href="{% url 'reports' %}">
-            <i class="fas fa-file-alt"></i> Reports
-          </a>
-          <a href="{% url 'user_management' %}">
-            <i class="fas fa-users-cog"></i> User Management
-          </a>
-          {% elif user.role == "SALES" %}
-          <a href="{% url 'sales_dashboard' %}"
-            ><i class="fas fa-chart-line"></i> Sales Dashboard</a
-          >
-          <a href="{% url 'record_sale' %}"
-            ><i class="fas fa-receipt"></i> Record Sale</a
-          >
-          <a href="{% url 'credit_scheme' %}"
-            ><i class="fas fa-piggy-bank"></i> Deposits</a
-          >
-          
-          <a href="{% url 'sales_today' %}"
-            ><i class="fas fa-chart-line"></i>Today's Sales</a
-          >
-          {% elif user.role == "STOCK" %}
-          <a href="{% url 'stock_dashboard' %}"
-            ><i class="fas fa-boxes"></i> Stock Dashboard</a
-          >
-          <a href="{% url 'stock_list' %}"
-            ><i class="fas fa-clipboard-list"></i> Stock Inventory</a
-          >
-          <a href="{% url 'suppliers' %}"
-            ><i class="fas fa-truck"></i> Suppliers</a
-          >
-          {% elif user.role == "CASHIER" %}
-          <a href="{% url 'cashier_dashboard' %}"
-            ><i class="fas fa-cash-register"></i> Cashier Dashboard</a
-          >
-          <a href="{% url 'credit_scheme' %}"
-            ><i class="fas fa-piggy-bank"></i> Deposits</a
-          >
-          <a href="{% url 'record_sale' %}"
-            ><i class="fas fa-receipt"></i> Record Sale</a
-          >
-          <a href="{% url 'sales_today' %}"
-            ><i class="fas fa-chart-line"></i>Today's Sales</a
-          >
-          <a href="{% url 'stock_list' %}"
-            ><i class="fas fa-clipboard-list"></i> Stock Inventory</a
-          >
-          <a href="{% url 'suppliers' %}"
-            ><i class="fas fa-truck"></i> Suppliers</a
-          >
-          <a
-            href="{% url 'scheme_enrollees' %}"
-            style="display: flex; align-items: center; gap: 10px"
-          >
-            <i class="fas fa-users"></i>
-            <span>Credit Scheme </span>
-          </a>
-          {% endif %}
-        </nav>
-      </div>
+      <h2>Nyondo General Hardware</h2>
+      
+      <!-- 🛠️ FIXED: Shifted wrapper layer parameters to allow automatic flex pinning for logout links -->
+      <nav>
+        {% if user.role == "ADMIN" %}
+        <a href="{% url 'admin_dashboard' %}"><i class="fas fa-user-shield"></i> Admin Dashboard</a>
+        <a href="{% url 'credit_scheme' %}"><i class="fas fa-piggy-bank"></i> Deposits</a>
+        <a href="{% url 'scheme_enrollees' %}"><i class="fas fa-users"></i> Credit Scheme List</a>
+        <a href="{% url 'record_sale' %}"><i class="fas fa-receipt"></i> Record Sale</a>
+        <a href="{% url 'suppliers' %}"><i class="fas fa-truck"></i> Suppliers</a>
+        <a href="{% url 'sales_today' %}"><i class="fas fa-chart-line"></i> Today's Sales</a>
+        <a href="{% url 'stock_list' %}"><i class="fas fa-clipboard-list"></i> Stock Inventory</a>
+        <a href="{% url 'reports' %}"><i class="fas fa-file-alt"></i> Reports</a>
+        <a href="{% url 'user_management' %}"><i class="fas fa-users-cog"></i> User Management</a>
+        
+        {% elif user.role == "SALES" %}
+        <a href="{% url 'sales_dashboard' %}"><i class="fas fa-chart-line"></i> Sales Dashboard</a>
+        <a href="{% url 'record_sale' %}"><i class="fas fa-receipt"></i> Record Sale</a>
+        <a href="{% url 'credit_scheme' %}"><i class="fas fa-piggy-bank"></i> Deposits</a>
+        <a href="{% url 'sales_today' %}"><i class="fas fa-chart-line"></i> Today's Sales</a>
+        
+        {% elif user.role == "STOCK" %}
+        <a href="{% url 'stock_dashboard' %}"><i class="fas fa-boxes"></i> Stock Dashboard</a>
+        <a href="{% url 'stock_list' %}"><i class="fas fa-clipboard-list"></i> Stock Inventory</a>
+        <a href="{% url 'suppliers' %}"><i class="fas fa-truck"></i> Suppliers</a>
+        
+        {% elif user.role == "CASHIER" %}
+        <a href="{% url 'cashier_dashboard' %}"><i class="fas fa-cash-register"></i> Cashier Dashboard</a>
+        <a href="{% url 'credit_scheme' %}"><i class="fas fa-piggy-bank"></i> Deposits</a>
+        <a href="{% url 'record_sale' %}"><i class="fas fa-receipt"></i> Record Sale</a>
+        <a href="{% url 'sales_today' %}"><i class="fas fa-chart-line"></i> Today's Sales</a>
+        <a href="{% url 'stock_list' %}"><i class="fas fa-clipboard-list"></i> Stock Inventory</a>
+        <a href="{% url 'suppliers' %}"><i class="fas fa-truck"></i> Suppliers</a>
+        <a href="{% url 'scheme_enrollees' %}"><i class="fas fa-users"></i> Credit Scheme</a>
+        {% endif %}
+      </nav>
 
-      <!-- Logout always visible at bottom -->
+      <!-- Logout Component (Properly pinned at the bottom margin frame) -->
       <div class="logout">
-        <a href="{% url 'logout' %}" style="color: #eb4d4b">
+        <a href="{% url 'logout' %}">
           <i class="fas fa-sign-out-alt"></i> Logout
         </a>
       </div>
     </div>
 
+    <!-- Main Dynamic Interface Body Block -->
     <div class="main-container">
       <div class="topbar">
-        <span
-          >{{ user.get_full_name|default:user.username }} ({{
-          user.role|default:"Staff" }})</span
-        >
-        <span style="color: #7f8c8d">{{ today|date:"D, d M Y" }}</span>
+        <span>
+          <i class="fas fa-user-circle" style="margin-right: 6px;"></i> 
+          {{ user.get_full_name|default:user.username }} 
+          <span style="font-size: 0.8rem; background: #e2e8f0; padding: 3px 8px; border-radius: 12px; margin-left: 6px; color: #475569;">
+            {{ user.role|default:"Staff" }}
+          </span>
+        </span>
+        <!-- 🛠️ FIXED: Replaced 'today' token parameter hook with native server engine clock strings -->
+        <span style="color: #7f8c8d; font-family: monospace; font-weight: bold;">
+          <i class="far fa-calendar-alt" style="margin-right: 4px;"></i> {% now "D, d M Y" %}
+        </span>
       </div>
 
-      <div class="content">{% block content %}{% endblock %}</div>
+      <!-- Content Insertion Extension Point Layer -->
+      <div class="content">
+        {% block content %}{% endblock %}
+      </div>
     </div>
   </body>
 </html>

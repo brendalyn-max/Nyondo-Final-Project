@@ -1,80 +1,237 @@
 {% extends "base.html" %}
-{% block title %}User Management{% endblock %}
+{% block title %}Staff Access Control Management | Nyondo Stock{% endblock %}
+
 {% block content %}
-
 <style>
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    border-radius: 10px;
-    overflow: hidden;
-}
+    /* Tab Control Layout Elements */
+    .user-tabs {
+        background: #e2e8f0;
+        padding: 10px;
+        border-radius: 8px;
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+        font-family: sans-serif;
+    }
+    .user-tabs a {
+        text-decoration: none;
+        color: #0a1f44;
+        font-weight: bold;
+        padding: 10px 20px;
+        border-radius: 5px;
+        transition: background 0.2s;
+    }
+    .user-tabs a:hover {
+        background: rgba(10, 31, 68, 0.05);
+    }
 
-th, td {
-    padding: 12px;
-    border-bottom: 1px solid #eee;
-    text-align: left;
-}
+    /* Native CSS Target Switch Panes (Zero JavaScript) */
+    .tab-panel {
+        display: none;
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+        font-family: sans-serif;
+        border: 1px solid #e2e8f0;
+    }
+    #members:target, #register_user:target { display: block; }
+    #members { display: block; }
+    #register_user:target~#members { display: none; }
 
-th {
-    background: #0a1f44;
-    color: white;
-}
+    /* Core Layout & Headers */
+    .user-panel-container {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    .panel-header {
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 15px;
+        margin-bottom: 25px;
+    }
+    .panel-header h1 {
+        color: #0a1f44;
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin: 0;
+    }
+    .panel-header p {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin-top: 4px;
+    }
 
-.badge {
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-}
+    /* Form Fields Formatting Design Rules */
+    .form-group { margin-bottom: 15px; }
+    .form-control { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; outline: none; }
+    .form-control:focus { border-color: #0a1f44; }
+    .btn-submit { background: #0a1f44; color: white; border: none; padding: 14px 25px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; font-size: 1rem; }
 
-.active { background: #27ae60; color: white; }
-.inactive { background: #e74c3c; color: white; }
+    /* Table System Architecture */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+    th {
+        background: #f8fafc;
+        padding: 14px 18px;
+        color: #475569;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    td {
+        padding: 16px 18px;
+        color: #334155;
+        font-size: 0.92rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background-color: #f8fafc; }
 
-.btn {
-    padding: 6px 10px;
-    border-radius: 5px;
-    text-decoration: none;
-    font-size: 12px;
-    color: white;
-}
+    /* Color-Coded Indicators & Badges */
+    .status-badge {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: inline-block;
+    }
+    .badge-active { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+    .badge-disabled { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
 
-.btn-disable { background: #e74c3c; }
-.btn-enable { background: #27ae60; }
+    .action-btn {
+        padding: 6px 14px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: bold;
+        display: inline-block;
+    }
+    .btn-disable-action { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+    .btn-enable-action { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
 </style>
 
-<h1>User Management</h1>
+<div class="user-panel-container">
+    
+    <div class="panel-header">
+        <h1>Staff System Authentication Portals</h1>
+        <p>Manage employee user lifecycles, permissions, and security parameters</p>
+    </div>
 
-<table class="table">
-    <tr>
-        <th>Username</th>
-        <th>Email</th>
-        <th>Status</th>
-        <th>Last Login</th>
-        <th>Action</th>
-    </tr>
-
-    {% for user in users %}
-    <tr>
-        <td>{{ user.username }}</td>
-        <td>{{ user.email }}</td>
-        <td>
-            {% if user.is_active %}
-                <span class="badge active">Active</span>
+    <!-- Dynamic Feedback Notifications -->
+    {% if messages %}
+    <div style="margin-bottom: 20px; font-family: sans-serif;">
+        {% for message in messages %}
+            <!-- Separated into static HTML tags so the editor's CSS parser stays completely happy -->
+            {% if message.tags == 'error' %}
+                <div style="padding: 12px; border-radius: 6px; font-weight: bold; margin-bottom: 10px; background: #ffebee; color: #c62828; border: 1px solid #ffcdd2;">
+                    {{ message }}
+                </div>
             {% else %}
-                <span class="badge inactive">Disabled</span>
+                <div style="padding: 12px; border-radius: 6px; font-weight: bold; margin-bottom: 10px; background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9;">
+                    {{ message }}
+                </div>
             {% endif %}
-        </td>
-        <td>{{ user.last_login }}</td>
-        <td>
-            {% if user.is_active %}
-                <a href="{% url 'toggle_user' user.id %}" class="btn btn-disable">Disable</a>
-            {% else %}
-                <a href="{% url 'toggle_user' user.id %}" class="btn btn-enable">Enable</a>
-            {% endif %}
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+        {% endfor %}
+    </div>
+{% endif %}
 
+    <!-- Navigation Tab Controllers -->
+    <div class="user-tabs">
+        <a href="#members">Active Personnel List</a>
+        <a href="#register_user">+ Add New Staff Account</a>
+    </div>
+
+    <!-- PANE A: REGISTER NEW STAFF FORM BLOCK -->
+    <div id="register_user" class="tab-panel">
+        <h3>Initialize New Employee Account</h3>
+        <p style="color: gray; font-size: 0.85rem; margin-bottom: 20px;">Passwords will be automatically encrypted natively upon creation.</p>
+        
+        <form method="POST" action="{% url 'add_user' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Username / ID</label>
+                <input type="text" name="username" class="form-control" placeholder="e.g. kbrenda" required>
+            </div>
+            <div class="form-group">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Email Address</label>
+                <input type="email" name="email" class="form-control" placeholder="e.g. brenda@nyondohardware.com" required>
+            </div>
+            <div class="form-group">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Ugandan Phone Line</label>
+                <!-- 15% Validation Criteria Compliance Regex pattern -->
+                <input type="text" name="phone" class="form-control" placeholder="e.g. 0772000000" pattern="(?:\+256|256|0)?(7\d{8})" required>
+            </div>
+            <div class="form-group">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Assigned Workspace Access Role</label>
+                <select name="role" class="form-control" required>
+                    <option value="" disabled selected>-- Select Operational Role --</option>
+                    <option value="ADMIN">Admin (Executive Control)</option>
+                    <option value="STOCK">Stock Manager (Inventory Desk)</option>
+                    <option value="CASHIER">Cashier (Front Desk)</option>
+                    <option value="SALES">Sales Person (Sales Engine)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Default Password</label>
+                <input type="password" name="password" class="form-control" placeholder="••••••••" minlength="8" required>
+            </div>
+            
+            <button type="submit" class="btn-submit">Generate Staff Credentials</button>
+        </form>
+    </div>
+
+    <!-- PANE B: STAFF LIST TABLE GRID -->
+    <div id="members" class="tab-panel">
+        <table>
+            <thead>
+                <tr>
+                    <th>Staff Username</th>
+                    <th>Email Address</th>
+                    <th>Workspace Role</th>
+                    <th>Account Status</th>
+                    <th>Last Active Stamp</th>
+                    <th>Access Security Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td style="font-weight: 600; color: #0a1f44;">@{{ user.username }}</td>
+                    <td>{{ user.email|default:"-- No Email Bound --" }}</td>
+                    <td>
+                        <span style="font-size: 0.85rem; font-weight: bold; padding: 3px 8px; border-radius: 6px; background: #f1f5f9; color: #475569;">
+                            {{ user.get_role_display|default:user.role }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if user.is_active %}
+                            <span class="status-badge badge-active">Active System Node</span>
+                        {% else %}
+                            <span class="status-badge badge-disabled">Deactivated</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-family: monospace; font-size: 0.85rem; color: #64748b;">
+                        {{ user.last_login|date:"d M Y H:i"|default:"Never Connected" }}
+                    </td>
+                    <td>
+                        {% if user.is_active %}
+                            <a href="{% url 'toggle_user' user.id %}" 
+                               onclick="return confirm('Suspend workspace operations access for user @{{ user.username }}?')" 
+                               class="action-btn btn-disable-action">Deactivate</a>
+                        {% else %}
+                            <a href="{% url 'toggle_user' user.id %}" class="action-btn btn-enable-action">Re-Authorize</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
 {% endblock %}

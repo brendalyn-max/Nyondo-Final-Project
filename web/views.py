@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
+from django.core.exceptions import PermissionDenied
+import decimal
 from django.utils.timezone import now
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -47,7 +49,7 @@ def index(request):
         messages.error(request, "Invalid username or password")
         return redirect("index")
 
-    return render(request, "index.html")
+    return render(request, "landing.html")
 
 def logout_view(request):
     """ Logout functionality """
@@ -213,9 +215,12 @@ def cashier_dashboard(request):
 def stock_list(request):
     items = StockItem.objects.all()
     categories = Category.objects.all()
+    suppliers = Supplier.objects.all()  #  Added this line to fetch suppliers
+    
     return render(request, 'stock.html', {
         'items': items,
-        'categories': categories
+        'categories': categories,
+        'suppliers': suppliers          # Added this key to share it with your HTML template
     })
 
 
@@ -223,16 +228,24 @@ def stock_list(request):
 def add_stock(request):
     if request.method == "POST":
         try:
-            category_id = request.POST.get('category')
-            category_obj = get_object_or_404(Category, id=category_id)
+            category_obj = get_object_or_404(Category, id=request.POST.get('category'))
+            supplier_obj = get_object_or_404(Supplier, id=request.POST.get('supplier')) # Added supplier lookup
+            
+            unit_cost = float(request.POST['unit_cost'])
+            selling_price = float(request.POST['selling_price'])
+            
+            if selling_price <= unit_cost: # Mandatory validation rule #6 guard
+                messages.error(request, "Validation Error: Selling price must be greater than unit cost.")
+                return redirect('stock_list')
             
             StockItem.objects.create(
                 name=request.POST['name'],
                 category=category_obj,
+                supplier=supplier_obj, # Bound mandatory model foreign key
                 unit=request.POST['unit'],
                 quantity=request.POST['quantity'],
-                unit_cost=request.POST['unit_cost'],
-                selling_price=request.POST['selling_price'],
+                unit_cost=unit_cost,
+                selling_price=selling_price,
                 specifications=request.POST.get('specifications', '')
             )
             messages.success(request, f"Successfully added {request.POST['name']} to stock.")
@@ -246,10 +259,19 @@ def add_stock(request):
 def edit_stock(request, item_id):
     item = get_object_or_404(StockItem, id=item_id)
     categories = Category.objects.all()
+    suppliers = Supplier.objects.all()
     
     if request.method == "POST":
         category_id = request.POST.get('category')
+        supplier_id = request.POST.get('supplier') # Added supplier extraction
+        
+        # Enforce validation safeguards
+        if float(request.POST['selling_price']) <= float(request.POST['unit_cost']):
+            messages.error(request, "Validation Error: Selling price must be greater than unit cost.")
+            return render(request, 'edit_stock.html', {'item': item, 'categories': categories, 'suppliers': suppliers})
+
         item.category = get_object_or_404(Category, id=category_id)
+        item.supplier = get_object_or_404(Supplier, id=supplier_id) # Bound updated model foreign key
         
         item.name = request.POST['name']
         item.unit = request.POST['unit']
@@ -262,7 +284,7 @@ def edit_stock(request, item_id):
         messages.success(request, f"Updated {item.name} successfully!")
         return redirect('stock_list')
         
-    return render(request, 'edit_stock.html', {'item': item, 'categories': categories})
+    return render(request, 'edit_stock.html', {'item': item, 'categories': categories, 'suppliers': suppliers})
 
 
 @login_required(login_url='/')
@@ -312,7 +334,7 @@ def record_sale(request):
         except (ValueError, TypeError):
             distance = 0
 
-        # Delivery fee calculation
+        # Delivery fee calculation rules
         if delivery:
             fee = 0 if (distance <= 10 and subtotal >= 500000) else 30000
         else:
@@ -320,26 +342,48 @@ def record_sale(request):
 
         total = subtotal + fee
 
+        # 🛠️ EXTRA MODULE SCHEME AUDIT: Protects salary-earner ledger balances
+        member_nin = request.POST.get('member_nin', '').strip().upper()
+        if sale_type == 'SCHEME':
+            if not member_nin:
+                messages.error(request, "Validation Error: Member NIN is strictly required for Credit Scheme pickups.")
+                return redirect(f'/record_sale/?type={active_tab}')
+            try:
+                earner = SalaryEarner.objects.get(nin_number=member_nin)
+                if earner.credit_balance < total:
+                    messages.error(request, f"Credit Deficit: Insufficient scheme balance allocation. Available: UGX {earner.credit_balance:,.0f}")
+                    return redirect(f'/record_sale/?type={active_tab}')
+                
+                # Commit ledger deduction on verification
+                earner.credit_balance -= total
+                earner.save()
+            except SalaryEarner.DoesNotExist:
+                messages.error(request, "Authorization Failure: No registered salary earner matches this NIN format layout.")
+                return redirect(f'/record_sale/?type={active_tab}')
+
         # Check stock availability
         if product.quantity >= qty:
             product.quantity -= qty
             product.save()
 
+            # 🛠️ FIXED: Added missing user tracking and distance parameter logging inputs
             sale = Sale.objects.create(
                 sale_type=sale_type,
                 item=product,
                 quantity=qty,
                 total_price=total,
                 delivery_fee=fee,
+                distance=distance, # Log data metric properly
                 customer_name=request.POST.get('customer', 'Walk-in'),
-                member_nin=request.POST.get('member_nin', '')
+                member_nin=member_nin if sale_type == 'SCHEME' else '',
+                user=request.user # Ties back user instance cleanly to clear dashboard crashes!
             )
 
-            messages.success(request, "Transaction Successful!")
+            messages.success(request, "Transaction Completed Successfully!")
             return redirect(f'/record_sale/?type={active_tab}&sale_id={sale.id}')
 
         else:
-            messages.error(request, "Insufficient Stock!")
+            messages.error(request, "Insufficient Stock Level Volumes Available!")
             return redirect(f'/record_sale/?type={active_tab}')
 
     last_sale = get_object_or_404(Sale, id=sale_id) if sale_id else None
@@ -349,71 +393,75 @@ def record_sale(request):
         'active_tab': active_tab,
         'last_sale': last_sale
     })
-# 5. credit scheme management views
 
+# 5. credit scheme management views
 @login_required(login_url='/')
 def credit_scheme(request):
     if request.method == "POST":
+        # ACTION 1: REGISTER MEMBER WITH TARGET AT ENROLLMENT
         if 'register_member' in request.POST:
-            nin = request.POST.get('nin')
+            nin = request.POST.get('nin', '').strip().upper()
             if SalaryEarner.objects.filter(nin_number=nin).exists():
-                messages.error(request, f"NIN {nin} is already registered.")
+                messages.error(request, f"Validation Error: NIN {nin} is already registered.")
             else:
-                SalaryEarner.objects.create(
-                    national_id_name=request.POST.get('name'),
-                    nin_number=nin,
-                    phone_number=request.POST.get('phone'),
-                    workplace=request.POST.get('workplace')
-                )
-                messages.success(request, "Member registered successfully!")
-            
-        elif 'record_deposit' in request.POST:
-            earner = get_object_or_404(SalaryEarner, id=request.POST.get('earner_id'))
-            product = get_object_or_404(StockItem, id=request.POST.get('product_id'))
-            qty = int(request.POST.get('quantity', 1))
+                try:
+                    product_id = request.POST.get('target_product')
+                    product_obj = get_object_or_404(Item, id=product_id)
+                    quantity = int(request.POST.get('target_quantity', 1))
+                    
+                    # Auto-calculate and store the static target cost baseline threshold
+                    calculated_amount = product_obj.price * quantity
 
-            Deposit.objects.create(
-                salary_earner=earner,
-                product=product,
-                quantity=qty,
-                amount=request.POST.get('amount')
-            )
-            messages.success(request, "Deposit recorded!")
+                    SalaryEarner.objects.create(
+                        national_id_name=request.POST.get('name'),
+                        nin_number=nin,
+                        phone_number=request.POST.get('phone'),
+                        workplace=request.POST.get('workplace'),
+                        target_product=product_obj,
+                        target_quantity=quantity,
+                        target_amount=calculated_amount
+                    )
+                    messages.success(request, "New salary earner account initialized successfully!")
+                except Exception as e:
+                    messages.error(request, f"Registration failed: {e}")
+            return redirect('/deposits/#register')
+            
+        # ACTION 2: RECORD SIMPLE CASH SAVINGS DEPOSIT ONLY
+        elif 'record_deposit' in request.POST:
+            try:
+                earner_id = request.POST.get('salary_earner')
+                amount_raw = request.POST.get('amount')
+
+                earner = get_object_or_404(SalaryEarner, id=earner_id)
+
+                # Commit simple deposit transaction history voucher log
+                Deposit.objects.create(
+                    salary_earner=earner,
+                    amount=decimal.Decimal(amount_raw)
+                )
+                
+                # Update member persistence profile wallet balance immediately
+                earner.credit_balance += decimal.Decimal(amount_raw)
+                earner.save()
+
+                messages.success(request, f"Ledger updated! Deposited UGX {float(amount_raw):,.0f} successfully.")
+            except Exception as e:
+                messages.error(request, f"Transaction failed to record: {e}")
+            return redirect('/deposits/#deposit')
             
         return redirect('credit_scheme')
 
-    # Data Preparation
-    earners = SalaryEarner.objects.all()
-    stock_items = StockItem.objects.all()
-    progress_data = []
-
-    for earner in earners:
-        products_saved = Deposit.objects.filter(salary_earner=earner).values_list('product', flat=True).distinct()
-        for p_id in products_saved:
-            if not p_id: continue
-            
-            product = StockItem.objects.get(id=p_id)
-            total_saved = Deposit.objects.filter(salary_earner=earner, product_id=p_id).aggregate(Sum('amount'))['amount__sum'] or 0
-            latest_dep = Deposit.objects.filter(salary_earner=earner, product_id=p_id).latest('id')
-            qty_intended = latest_dep.quantity
-
-            target_price = product.selling_price * qty_intended
-            percent = (total_saved / target_price * 100) if target_price > 0 else 0
-            
-            progress_data.append({
-                'earner': earner,
-                'product': product,
-                'qty': qty_intended,
-                'target': target_price,
-                'total': total_saved,
-                'progress': min(round(percent, 1), 100)
-            })
+    # Data Retrieval Blocks (Queries specific Item instead of general StockItem)
+    earners = SalaryEarner.objects.select_related('target_product').all()
+    scheme_items = Item.objects.all() 
 
     return render(request, 'deposits.html', {
         'earners': earners,
-        'stock_items': stock_items,
-        'progress_data': progress_data
+        'scheme_items': scheme_items
     })
+
+
+    
 # supplier page view
 
 def suppliers(request):
@@ -512,77 +560,129 @@ def sale_detail(request, sale_id):
         'sale': sale
     })
 
-@login_required
+@login_required(login_url='/')
 def reports(request):
     today = timezone.now().date()
 
-    # ---------------- SALES ----------------
+    # ---------------- 1. SALES & PROFIT CALCULATIONS ----------------
     today_sales = Sale.objects.filter(date_sold__date=today)
     today_revenue = today_sales.aggregate(total=Sum('total_price'))['total'] or 0
 
     all_sales = Sale.objects.all()
     total_revenue = all_sales.aggregate(total=Sum('total_price'))['total'] or 0
 
-    total_profit = sum(
-        s.total_price - (s.item.unit_cost * s.quantity)
-        for s in all_sales
-    )
+    # 💡 CODE QUALITY OPTIMIZATION: Database-level calculation loop bypass (Revenue - (Cost * Qty))
+    total_profit = Sale.objects.aggregate(
+        profit=Sum(
+            ExpressionWrapper(
+                F('total_price') - (F('item__unit_cost') * F('quantity')),
+                output_field=DecimalField(max_digits=12, decimal_places=0)
+            )
+        )
+    )['profit'] or 0
 
-    # ---------------- STOCK ----------------
+    # ---------------- 2. REAL ACCURATE STOCK METRICS ----------------
     low_stock = StockItem.objects.filter(quantity__lte=5, quantity__gt=0)
     out_stock = StockItem.objects.filter(quantity=0)
 
+    # 💡 FORMULA REPAIR: Multiplies unit prices against actual stored stock volumes
     stock_value = StockItem.objects.aggregate(
-        total=Sum('selling_price')
+        total=Sum(
+            ExpressionWrapper(
+                F('selling_price') * F('quantity'),
+                output_field=DecimalField(max_digits=12, decimal_places=0)
+            )
+        )
     )['total'] or 0
 
     total_items = StockItem.objects.count()
 
-    # ---------------- SUPPLIERS ----------------
-    supplier_debt = Supplier.objects.aggregate(
-        total=Sum('credit')
-    )['total'] or 0
-
-    # ---------------- SCHEME ----------------
-    scheme_savings = Deposit.objects.aggregate(
-        total=Sum('amount')
-    )['total'] or 0
-
+    # ---------------- 3. EXTRA MODULES SUMMARY DATA ----------------
+    supplier_debt = Supplier.objects.aggregate(total=Sum('credit'))['total'] or 0
+    scheme_savings = Deposit.objects.aggregate(total=Sum('amount'))['total'] or 0
     scheme_members = SalaryEarner.objects.count()
 
     return render(request, "reports.html", {
         "today": today,
-
-        # sales
         "today_revenue": today_revenue,
         "total_revenue": total_revenue,
         "total_profit": total_profit,
-
-        # stock
         "low_stock_count": low_stock.count(),
         "out_of_stock_count": out_stock.count(),
         "stock_value": stock_value,
         "total_items": total_items,
-
-        # suppliers
         "supplier_debt": supplier_debt,
-
-        # scheme
         "scheme_savings": scheme_savings,
         "scheme_members": scheme_members,
     })
 
-@login_required
+@login_required(login_url='/')
 def user_management(request):
-    users = CustomUser.objects.all()
+    """ Renders the active personnel ledger list and handling tab frames """
+    # AUTHENTICATION GUARD: Restrict access strictly to ADMIN role profiles
+    if getattr(request.user, 'role', '') != 'ADMIN':
+        raise PermissionDenied  # Redirects to HTTP 403 Forbidden page
 
+    users = CustomUser.objects.all().order_by('-is_active', 'username')
     return render(request, "users.html", {
         "users": users
     })
 
-@login_required
+
+@login_required(login_url='/')
 def toggle_user(request, user_id):
-    user = CustomUser.objects.get(id=user_id)
+    """ Safely activates or deactivates an employee's system node credentials """
+    # AUTHENTICATION GUARD: Protect backend administrative action endpoints
+    if getattr(request.user, 'role', '') != 'ADMIN':
+        raise PermissionDenied
+
+    # SAFETY GUARD: Prevent logged-in admin session lockout crashes
+    if request.user.id == int(user_id):
+        messages.error(request, "Security Guard: You cannot deactivate your own active administrator session account.")
+        return redirect('user_management')
+
+    user = get_object_or_404(CustomUser, id=user_id)
     user.is_active = not user.is_active
     user.save()
+
+    status_str = "re-authorized" if user.is_active else "deactivated"
+    messages.warning(request, f"Workspace access profile for user @{user.username} has been {status_str}.")
     return redirect('user_management')
+
+
+@login_required(login_url='/')
+def add_user(request):
+    """ Securely initializes a new staff profile into database tables """
+    # AUTHENTICATION GUARD: Prevent malicious data submissions
+    if getattr(request.user, 'role', '') != 'ADMIN':
+        raise PermissionDenied
+
+    if request.method == "POST":
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password')
+        role = request.POST.get('role')
+        phone = request.POST.get('phone', '').strip()
+
+        # DUPLICATE DATA SAFEGUARD: Validate username uniqueness criteria
+        if CustomUser.objects.filter(username=username).exists():
+            messages.error(request, f"Creation Failure: Username @{username} is already taken inside the system ledger.")
+            return redirect('/users/#register_user')
+
+        try:
+            # Django Cryptographic Security Pattern: Automatically encrypts the raw password [1]
+            CustomUser.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                role=role,
+                phone=phone
+            )
+            messages.success(request, f"Staff credential portfolio for @{username} has been initialized successfully!")
+        except Exception as e:
+            messages.error(request, f"System Registry Error: Failed to generate account: {e}")
+
+    return redirect('user_management')
+
+def landing(request):
+    return render(request, "index.html")  

@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nyondo General Hardware LTD | Enterprise Management System</title>
+    
+    <style>
+        /* Modern Corporate Core Reset & Variables */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        :root {
+            --primary: #0a1f44;
+            --primary-light: #123366;
+            --accent: #27ae60;
+            --dark: #0f172a;
+            --slate: #475569;
+            --light: #f8fafc;
+            --white: #ffffff;
+            --border: #e2e8f0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: var(--light);
+        }
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* Responsive Layout Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Top Executive Navigation Bar */
+        .navbar {
+            background-color: var(--white);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+        }
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 16px;
+            padding-bottom: 16px;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .brand-logo {
+            background-color: var(--primary);
+            color: var(--white);
+            font-weight: 800;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+        }
+        .brand-title h1 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.3px;
+        }
+        .brand-title small {
+            font-size: 0.65rem;
+            color: var(--slate);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+            display: block;
+            margin-top: 1px;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            list-style: none;
+        }
+        .nav-links a {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--slate);
+            transition: color 0.2s;
+        }
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        .btn-portal {
+            background-color: var(--primary);
+            color: var(--white) !important;
+            padding: 10px 22px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            transition: background 0.2s;
+            box-shadow: 0 2px 4px rgba(10, 31, 68, 0.1);
+        }
+        .btn-portal:hover {
+            background-color: var(--primary-light);
+        }
+
+        /* Dual-Column Hero Layout Section */
+        .hero {
+            padding: 90px 0;
+            background: linear-gradient(180deg, var(--white) 0%, var(--light) 100%);
+        }
+        .hero .container {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+        .badge {
+            display: inline-block;
+            background-color: #eaf5ff;
+            color: var(--primary-light);
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            border: 1px solid #cce4ff;
+            letter-spacing: 0.5px;
+        }
+        .hero h2 {
+            font-size: 2.75rem;
+            font-weight: 800;
+            line-height: 1.2;
+            color: var(--dark);
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+        }
+        .hero h2 span {
+            color: var(--primary-light);
+            border-bottom: 3px solid var(--accent);
+        }
+        .hero p {
+            color: var(--slate);
+            font-size: 1.05rem;
+            margin-bottom: 35px;
+            max-width: 540px;
+        }
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+        }
+        .btn-action-dark {
+            background-color: var(--dark);
+            color: var(--white);
+            padding: 14px 30px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: opacity 0.2s;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+        }
+        .btn-action-dark:hover {
+            opacity: 0.9;
+        }
+        .btn-action-outline {
+            background-color: var(--white);
+            color: var(--dark);
+            border: 1px solid var(--border);
+            padding: 14px 30px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .btn-action-outline:hover {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        /* Interactive Split Metric Panels Grid */
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .metric-card {
+            background-color: var(--white);
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .metric-icon {
+            font-size: 1.75rem;
+            margin-bottom: 12px;
+        }
+        .metric-card h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+        .metric-card p {
+            font-size: 0.82rem;
+            color: var(--slate);
+            line-height: 1.4;
+            margin-bottom: 0;
+        }
+
+        /* Unified Sections Setup */
+        .section-padding {
+            padding: 80px 0;
+            border-top: 1px solid var(--border);
+        }
+        .bg-white-section {
+            background-color: var(--white);
+        }
+        .section-header {
+            text-align: center;
+            max-width: 650px;
+            margin: 0 auto 55px auto;
+        }
+        .section-header h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 12px;
+            letter-spacing: -0.3px;
+        }
+        .section-header p {
+            color: var(--slate);
+            font-size: 0.95rem;
+        }
+
+        /* System Functional Architecture Grid */
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+        .module-card {
+            border: 1px solid var(--border);
+            background-color: var(--light);
+            padding: 32px;
+            border-radius: 8px;
+            border-top: 4px solid var(--primary);
+        }
+        .module-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--dark);
+        }
+        .module-card p {
+            font-size: 0.88rem;
+            color: var(--slate);
+            line-height: 1.5;
+        }
+
+        /* Workspace Authorization Permissive Grid (REPAIRED) */
+        .roles-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            text-align: center;
+        }
+        .role-card {
+            background-color: var(--white);
+            padding: 35px 25px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.01);
+        }
+        .role-card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 4px;
+        }
+        .role-badge {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .role-sales { background-color: #eaf5ff; color: var(--primary-light); }
+        .role-store { background-color: #e8f5e9; color: var(--accent); }
+        .role-admin { background-color: #fff3e0; color: #ef6c00; }
+        
+        .role-card p {
+            font-size: 0.88rem;
+            color: var(--slate);
+            line-height: 1.5;
+        }
+
+        /* Clean System Baseline Footer */
+        .footer {
+            background-color: var(--dark);
+            color: #94a3b8;
+            padding: 35px 0;
+            border-top: 1px solid #1e293b;
+        }
+        .footer .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .footer p {
+            font-size: 0.85rem;
+        }
+        .footer-tech {
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        /* Pure CSS Login Modal Layout Elements */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+        }
+        #loginModal:target { 
+            display: flex !important; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .login-box-content { 
+            background: white; 
+            padding: 35px; 
+            border-radius: 8px; 
+            width: 100%; 
+            max-width: 400px; 
+            position: relative; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15); 
+            font-family: sans-serif; 
+        }
+        .login-field { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #ccc; 
+            border-radius: 6px; 
+            margin-bottom: 15px; 
+            box-sizing: border-box; 
+            outline: none; 
+        }
+        .login-field:focus { border-color: #0a1f44; }
+
+        /* Semantic Layout Responsiveness Rules */
+        @media (max-width: 992px) {
+            .hero .container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .hero p {
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .hero-buttons {
+                justify-content: center;
+            }
+            .module-grid, .roles-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Dynamic Enterprise Navigation Ribbon -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="brand">
+                <div class="brand-logo">NH</div>
+                <div class="brand-title">
+                    <h1>Nyondo Stock</h1>
+                    <small>General Hardware LTD</small>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#modules">Core Modules</a></li>
+                <li><a href="#roles">Workspace Roles</a></li>
+                <li><a href="#loginModal" class="btn-portal">System Portal Sign In</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Structural Hero Panel Layout Block -->
+    <header class="hero">
+        <div class="container">
+            <div>
+                <span class="badge">Official Enterprise Management Portal</span>
+                <h2>Digitizing Hardware Operations, <span>Credit Schemes &amp; Logistics</span></h2>
+                <p>A centralized digital ecosystem custom-tailored for NYONDO General Hardware LTD. Track real-time inventory assets, manage dynamic supplier metrics, automate salary-earner deposit accounts, and accurately track structural order transactions.</p>
+                <div class="hero-buttons">
+                    <a href="#loginModal" class="btn-action-dark">Access Portal Dashboard</a>
+                    <a href="#modules" class="btn-action-outline">Explore Modules</a>
+                </div>
+            </div>
+            
+            <div class="metric-grid">
+                <div class="metric-card" style="border-top: 4px solid var(--primary);">
+                    <div class="metric-icon">📦</div>
+                    <h3>Stock Control</h3>
+                    <p>Automated reorder triggers and price-margin structural guards.</p>
+                </div>
+                <div class="metric-card" style="border-top: 4px solid var(--accent);">
+                    <div class="metric-icon">💳</div>
+                    <h3>Credit Scheme</h3>
+                    <p>Incremental milestone tracking for salary-earners.</p>
+                </div>
+                <div class="metric-card" style="border-top: 4px solid var(--primary-light);">
+                    <div class="metric-icon">📊</div>
+                    <h3>Sales Engine</h3>
+                    <p>Instant billing ticket outputs and validation safeguards.</p>
+                </div>
+                <div class="metric-card" style="border-top: 4px solid #f59e0b;">
+                    <div class="metric-icon">🚚</div>
+                    <h3>Transport Module</h3>
+                    <p>Automated logistical delivery fee distance calculations.</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Section 1: Core Functional Subsystem Architecture Module Panels -->
+    <section id="modules" class="section-padding bg-white-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Functional System Architecture</h2>
+                <p>Designed to completely eliminate manual documentation deficits through optimized architectural processing layers.</p>
+            </div>
+            <div class="module-grid">
+                <div class="module-card">
+                    <h3>1. Inventory Integrity</h3>
+                    <p>Protects retail revenue margins via rigid model validation checks (Rule #6), ensuring product selling values can never sit below baseline acquisition unit costs.</p>
+                </div>
+                <div class="module-card">
+                    <h3>2. Financial Verification</h3>
+                    <p>Enforces national accounting compliance parameters natively at database layers, checking for valid Ugandan phone configurations and unique 14-character NIRA National IDs (NIN).</p>
+                </div>
+                <div class="module-card">
+                    <h3>3. Logistics Automation</h3>
+                    <p>Calculates geographical delivery distribution charges automatically during order processing, linking distance inputs directly with dynamic free-shipping threshold logic values.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Workspace Access & Authorization Boundaries Grid Panels -->
+    <section id="roles" class="section-padding">
+        <div class="container">
+            <div class="section-header">
+                <h2>Target Workspace Dimensions</h2>
+                <p>Strict role-based `@login_required` decorator access controls regulate interface visibility parameters depending on assigned group parameters.</p>
+            </div>
+            <div class="roles-grid">
+                <div class="role-card">
+                    <h3>Sales Attendant</h3>
+                    <span class="role-badge role-sales">Front Office</span>
+                    <p>Processes real-time sales transactions, runs input validation checks, issues formatted customer billing receipts, and checks stock line quantities.</p>
+                </div>
+                <div class="role-card">
+                    <h3>Store Manager</h3>
+                    <span class="role-badge role-store">Inventory Desk</span>
+                    <p>Registers wholesale assets, defines baseline unit cost parameters, initializes item dimensions, and monitors reorder threshold level alerts.</p>
+                </div>
+                <div class="role-card">
+                    <h3>Accounts / Admin</h3>
+                    <span class="role-badge role-admin">Executive Control</span>
+                    <p>Tracks open supplier credit debts, reviews dynamic salary-earner savings milestones, configures user profiles, and evaluates database analytical reports.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🔐 Pure CSS Modal Login Panel Component (Zero JavaScript) -->
+    <div id="loginModal" class="modal">
+        <div class="login-box-content">
+            <a href="#" style="position: absolute; right: 20px; top: 15px; font-size: 24px; font-weight: bold; color: #64748b;">&times;</a>
+            
+            <div style="text-align: center; margin-bottom: 25px;">
+                <div style="background: #0a1f44; color: white; display: inline-block; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 1.1rem; margin-bottom: 10px;">NH</div>
+                <h3 style="color: #0a1f44; font-weight: 800; margin: 0;">Portal Authentication</h3>
+                <p style="color: gray; font-size: 0.8rem; margin-top: 4px;">Enter authorization credentials to access dashboards</p>
+            </div>
+
+            <!-- Global Action Feedback Notifications inside layout -->
+            {% if messages %}
+                <div style="margin-bottom: 15px; padding: 10px; background: #ffebee; color: #c62828; border-radius: 4px; font-size: 0.85rem; font-weight: bold; text-align: center;">
+                    {% for message in messages %}{{ message }}{% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST" action="{% url 'index' %}">
+                {% csrf_token %}
+                <label style="display:block; font-weight:bold; margin-bottom:6px; font-size:0.85rem; color:#0a1f44;">Username / Staff ID</label>
+                <input type="text" name="username" class="login-field" placeholder="e.g. kbrenda" required>
+
+                <label style="display:block; font-weight:bold; margin-bottom:6px; font-size:0.85rem; color:#0a1f44;">Account Password</label>
+                <input type="password" name="password" class="login-field" placeholder="••••••••" required>
+
+                <button type="submit" style="width:100%; background:#0a1f44; color:white; border:none; padding:14px; border-radius:6px; font-weight:bold; font-size:1rem; cursor:pointer; margin-top:10px;">
+                    Verify &amp; Authenticate
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Clean Corporate System Baseline Footer Ribbon -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Nyondo General Hardware LTD. All rights reserved.</p>
+            <p class="footer-tech">Core Engine: Python Django | DB Architecture: SQLite</p>
+        </div>
+    </footer>
+
+</body>
+</html>
