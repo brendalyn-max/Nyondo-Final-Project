@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize %}
 {% block title %}Suppliers{% endblock %}
 
 {% block content %}
@@ -6,12 +7,15 @@
     h2 {
         margin-bottom: 20px;
         color: #0a1f44;
+        font-family: sans-serif;
     }
 
+    /* Core UI Table - Exactly matching your original structure styling constraints */
     table {
         width: 100%;
         border-collapse: collapse;
         margin-bottom: 30px;
+        background: white;
     }
 
     th,
@@ -26,16 +30,7 @@
         color: white;
     }
 
-    td a {
-        color: #27ae60;
-        text-decoration: none;
-        font-weight: bold;
-    }
-
-    td a:hover {
-        text-decoration: underline;
-    }
-
+    /* Button System Elements layout variables */
     .btn {
         display: inline-block;
         padding: 10px 15px;
@@ -44,12 +39,42 @@
         text-decoration: none;
         border-radius: 4px;
         margin-bottom: 20px;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
     }
-
     .btn:hover {
         background: #219150;
     }
 
+    /* Action Buttons Box Row Layout */
+    .action-btn-group {
+        display: flex;
+        gap: 6px;
+    }
+
+    .btn-action {
+        padding: 6px 12px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: bold;
+        color: white;
+        border: none;
+        cursor: pointer;
+        display: inline-block;
+    }
+    .btn-view { background-color: #0a1f44; }
+    .btn-view:hover { background-color: #123366; }
+    
+    .btn-edit { background-color: #ef6c00; }
+    .btn-edit:hover { background-color: #d86200; }
+    
+    .btn-delete { background-color: #eb4d4b; }
+    .btn-delete:hover { background-color: #cf3c3a; }
+
+    /* Script-Free Script Pop-up Modals Engine */
     .modal {
         display: none;
         position: fixed;
@@ -59,6 +84,7 @@
         width: 100%;
         height: 100%;
         background: rgba(0, 0, 0, 0.6);
+        font-family: sans-serif;
     }
 
     .modal:target {
@@ -71,7 +97,7 @@
         background: white;
         padding: 25px;
         border-radius: 8px;
-        width: 400px;
+        width: 420px;
         position: relative;
     }
 
@@ -82,19 +108,48 @@
         font-size: 22px;
         text-decoration: none;
         color: #333;
+        font-weight: bold;
     }
 
     input,
     textarea {
         width: 100%;
-        padding: 8px;
+        padding: 10px;
         margin-bottom: 12px;
         border: 1px solid #ccc;
         border-radius: 4px;
+        box-sizing: border-box;
+        outline: none;
+    }
+    input:focus, textarea:focus {
+        border-color: #0a1f44;
+    }
+
+    /* Flash alerts display banner system */
+    .alert-msg {
+        padding: 12px;
+        border-radius: 4px;
+        font-weight: bold;
+        margin-bottom: 15px;
     }
 </style>
 
 <h2>Suppliers</h2>
+{% if messages %}
+    <div style="font-family: sans-serif; margin-bottom: 20px;">
+        {% for message in messages %}
+            {% if message.tags == 'error' %}
+                <div class="alert-msg" style="background: #f8d7da; color: #721c24; padding: 12px; border-radius: 4px; font-weight: bold; margin-bottom: 15px; border: 1px solid #f5c6cb;">
+                    {{ message }}
+                </div>
+            {% else %}
+                <div class="alert-msg" style="background: #d4edda; color: #155724; padding: 12px; border-radius: 4px; font-weight: bold; margin-bottom: 15px; border: 1px solid #c3e6cb;">
+                    {{ message }}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endif %}
 
 <!-- Register Supplier button -->
 <a href="#registerSupplier" class="btn">Register Supplier</a>
@@ -103,50 +158,95 @@
     <thead>
         <tr>
             <th>Name</th>
-            <th>Action</th>
+            <th>Outstanding Balance Arrears</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         {% for supplier in suppliers %}
         <tr>
-            <td>{{ supplier.name }}</td>
-            <td><a href="#supplier{{ supplier.id }}">View</a></td>
+            <td style="font-weight: 500;">{{ supplier.name }}</td>
+            <td style="font-family: monospace; font-weight: bold;">UGX {{ supplier.credit|intcomma }}</td>
+            <td>
+                <div class="action-btn-group">
+                    <a href="#viewSupplier{{ supplier.id }}" class="btn-action btn-view">View Details</a>
+                    <a href="#editSupplier{{ supplier.id }}" class="btn-action btn-edit">Edit Profile</a>
+                    
+                    
+                    <form action="{% url 'delete_supplier' supplier.id %}" method="POST" style="display:inline; margin:0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-action btn-delete" onclick="return confirm('Are you sure you want to completely delete supplier: {{ supplier.name }}?');">
+                            Delete
+                        </button>
+                    </form>
+                </div>
+            </td>
         </tr>
+</tbody>
 
-        <!-- Modal for supplier details -->
-        <div id="supplier{{ supplier.id }}" class="modal">
+        <!-- MODAL 1:  VIEW DETAILS  -->
+        <div id="viewSupplier{{ supplier.id }}" class="modal">
             <div class="modal-content">
                 <a href="#" class="close">&times;</a>
-                <h3>{{ supplier.name }}</h3>
-                <p><strong>Contact:</strong> {{ supplier.contact }}</p>
-                <p><strong>Address:</strong> {{ supplier.address }}</p>
-                <p><strong>Credit:</strong> {{ supplier.credit }}</p>
+                <h3 style="color: #0a1f44; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 8px;">{{ supplier.name }}</h3>
+                <p style="margin-bottom: 8px;"><strong>Contact Line:</strong> {{ supplier.contact|default:"N/A" }}</p>
+                <p style="margin-bottom: 8px;"><strong>Physical Depot Address:</strong> {{ supplier.address|default:"N/A" }}</p>
+                <p style="margin-bottom: 15px;"><strong>Outstanding Credit </strong> <span style="font-weight:bold; color:#eb4d4b;">UGX {{ supplier.credit|intcomma }}</span></p>
+                <a href="#" class="btn" style="width: 100%; text-align: center; background: #64748b; margin-bottom: 0;">Close Profile</a>
             </div>
         </div>
+
+        <!-- MODAL 2: EDIT ENTRY  -->
+        <div id="editSupplier{{ supplier.id }}" class="modal">
+            <div class="modal-content">
+                <a href="#" class="close">&times;</a>
+                <h3 style="color: #0a1f44; margin-bottom: 15px;">Modify Supplier: {{ supplier.name }}</h3>
+                <form method="POST" action="{% url 'edit_supplier' supplier.id %}">
+                    {% csrf_token %}
+                    <label style="display:block; font-weight:bold; margin-bottom:4px;">Vendor Corporate Name</label>
+                    <input type="text" name="name" value="{{ supplier.name }}" required>
+
+                    <label style="display:block; font-weight:bold; margin-bottom:4px;">Contact Phone (Ugandan metrics)</label>
+                    <input type="text" name="contact" value="{{ supplier.contact|default:'' }}" pattern="(?:\+256|256|0)?(7\d{8})" title="Provide a valid Ugandan line matching 07... or +2567...">
+
+                    <label style="display:block; font-weight:bold; margin-bottom:4px;">Warehouse Address</label>
+                    <textarea name="address" rows="2" style="width:100%; border:1px solid #ccc; border-radius:4px; padding:8px; margin-bottom:12px; outline:none; font-family:sans-serif;">{{ supplier.address }}</textarea>
+
+                    <label style="display:block; font-weight:bold; margin-bottom:4px;">Liability Debt (UGX)</label>
+                    <input type="number" name="credit" value="{{ supplier.credit|floatformat:0 }}" min="0" required>
+
+                    <button type="submit" class="btn" style="width: 100%; background: #ef6c00; margin-bottom: 0;">Commit Parameter Update</button>
+                </form>
+            </div>
+        </div>
+        {% empty %}
+        <tr>
+            <td colspan="3" style="text-align: center; color: #999; padding: 25px;">No active supplier entities discovered in records indices.</td>
+        </tr>
         {% endfor %}
     </tbody>
 </table>
 
-<!-- Modal for Register Supplier -->
+<!-- MODAL 3: REUSE REGISTER SUPPLIER -->
 <div id="registerSupplier" class="modal">
     <div class="modal-content">
         <a href="#" class="close">&times;</a>
-        <h3>Register New Supplier</h3>
-        <form method="post">
+        <h3 style="color: #0a1f44; margin-bottom: 15px;">Register New Supplier</h3>
+        <form method="POST" action="{% url 'suppliers' %}">
             {% csrf_token %}
-            <label>Name</label>
-            <input type="text" name="name" required>
+            <label style="display:block; font-weight:bold; margin-bottom:4px;">Name</label>
+            <input type="text" name="name" placeholder="e.g., Mukwano Distributors" required>
 
-            <label>Contact</label>
-            <input type="text" name="contact">
+            <label style="display:block; font-weight:bold; margin-bottom:4px;">Contact</label>
+            <input type="text" name="contact" placeholder="e.g., 0772000000" pattern="(?:\+256|256|0)?(7\d{8})" title="Provide a valid Ugandan line matching 07... or +2567...">
 
-            <label>Address</label>
-            <textarea name="address"></textarea>
+            <label style="display:block; font-weight:bold; margin-bottom:4px;">Address</label>
+            <textarea name="address" placeholder="Plot layout configuration locations..." rows="2" style="width:100%; border:1px solid #ccc; border-radius:4px; padding:8px; margin-bottom:12px; outline:none; font-family:sans-serif;"></textarea>
 
-            <label>Credit</label>
-            <input type="number" step="0.01" name="credit" value="0">
+            <label style="display:block; font-weight:bold; margin-bottom:4px;">Credit Balance Debt (UGX)</label>
+            <input type="number" name="credit" min="0" value="0" required>
 
-            <button type="submit" class="btn">Save Supplier</button>
+            <button type="submit" class="btn" style="width: 100%; margin-top: 5px; margin-bottom: 0;">Save Supplier</button>
         </form>
     </div>
 </div>

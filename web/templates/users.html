@@ -25,7 +25,7 @@
         background: rgba(10, 31, 68, 0.05);
     }
 
-    /* Native CSS Target Switch Panes (Zero JavaScript) */
+    /* Native CSS Target Switch Panes  */
     .tab-panel {
         display: none;
         background: white;
@@ -65,8 +65,7 @@
     .form-control { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; outline: none; }
     .form-control:focus { border-color: #0a1f44; }
     .btn-submit { background: #0a1f44; color: white; border: none; padding: 14px 25px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; font-size: 1rem; }
-
-    /* Table System Architecture */
+    .btn-submit:hover { background: #0a1f44cc; }
     table {
         width: 100%;
         border-collapse: collapse;
@@ -91,7 +90,6 @@
     tr:last-child td { border-bottom: none; }
     tr:hover td { background-color: #f8fafc; }
 
-    /* Color-Coded Indicators & Badges */
     .status-badge {
         padding: 4px 10px;
         border-radius: 12px;
@@ -139,18 +137,15 @@
         {% endfor %}
     </div>
 {% endif %}
-
-    <!-- Navigation Tab Controllers -->
     <div class="user-tabs">
         <a href="#members">Active Personnel List</a>
         <a href="#register_user">+ Add New Staff Account</a>
     </div>
 
-    <!-- PANE A: REGISTER NEW STAFF FORM BLOCK -->
+    <!-- register new staff -->
     <div id="register_user" class="tab-panel">
         <h3>Initialize New Employee Account</h3>
         <p style="color: gray; font-size: 0.85rem; margin-bottom: 20px;">Passwords will be automatically encrypted natively upon creation.</p>
-        
         <form method="POST" action="{% url 'add_user' %}">
             {% csrf_token %}
             <div class="form-group">
@@ -163,7 +158,6 @@
             </div>
             <div class="form-group">
                 <label style="font-weight: bold; display: block; margin-bottom: 5px;">Ugandan Phone Line</label>
-                <!-- 15% Validation Criteria Compliance Regex pattern -->
                 <input type="text" name="phone" class="form-control" placeholder="e.g. 0772000000" pattern="(?:\+256|256|0)?(7\d{8})" required>
             </div>
             <div class="form-group">
@@ -185,7 +179,7 @@
         </form>
     </div>
 
-    <!-- PANE B: STAFF LIST TABLE GRID -->
+    <!-- list showing system users-->
     <div id="members" class="tab-panel">
         <table>
             <thead>

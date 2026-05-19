@@ -130,19 +130,19 @@
     <div class="actions">
 
         <a href="{% url 'record_sale' %}" class="action-btn green">
-            🧾 New Sale
+             New Sale
         </a>
 
         <a href="{% url 'sales_today' %}" class="action-btn blue">
-            📊 Today Sales
+            Today Sales
         </a>
 
         <a href="{% url 'stock_list' %}" class="action-btn orange">
-            📦 Stock Check
+            Stock Check
         </a>
 
         <a href="#" class="action-btn red">
-            🔄 Refund (Soon)
+            Refund (Soon)
         </a>
 
     </div>
@@ -183,7 +183,7 @@
 
     <!-- RECENT SALES -->
     <div class="section">
-        <h3>🧾 Recent Sales</h3>
+        <h3> Recent Sales</h3>
 
         {% if sales_log %}
             {% for sale in sales_log %}
@@ -202,7 +202,7 @@
 
     <!-- SCHEME -->
     <div class="section">
-        <h3>💰 Scheme Savings</h3>
+        <h3>Scheme Savings</h3>
 
         {% if scheme_summary %}
             {% for s in scheme_summary %}

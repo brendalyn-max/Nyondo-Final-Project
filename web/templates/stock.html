@@ -46,7 +46,7 @@
         text-decoration: none;
     }
 
-    /* Core Data Table Elements */
+    /*  Data Table Elements */
     .table-container {
         background: white;
         border-radius: 8px;
@@ -95,7 +95,7 @@
         color: #c62828;
     }
 
-    /* Modal Form Structural Blocks */
+    /* pop up modal overlay system */
     .modal-content label {
         display: block;
         margin: 10px 0 5px 0;
@@ -123,7 +123,6 @@
 {% if messages %}
     <div style="margin-bottom: 20px;">
         {% for message in messages %}
-            <!-- Moved variables entirely into standard HTML layout logic tags -->
             {% if message.tags == 'error' %}
                 <div style="padding: 12px; border-radius: 4px; font-weight: 600; margin-bottom: 10px; background: #ffebee; color: #c62828; border: 1px solid #ffcdd2;">
                     {{ message }}
@@ -178,7 +177,7 @@
                 </td>
             </tr>
 
-            <!-- Dynamic Edit Modal Container for each Item Instance -->
+            <!--  Edit Modal Container for each Item -->
             <div id="editModal{{ item.id }}" class="modal">
                 <div class="modal-content">
                     <a href="#" class="close">&times;</a>

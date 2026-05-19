@@ -463,25 +463,65 @@ def credit_scheme(request):
 
     
 # supplier page view
-
+@login_required(login_url='/')
 def suppliers(request):
     if request.method == "POST":
-        # Handle supplier registration form
-        name = request.POST.get("name")
-        contact = request.POST.get("contact")
-        address = request.POST.get("address")
-        credit = request.POST.get("credit")
+        try:
+            name = request.POST.get("name", "").strip()
+            contact = request.POST.get("contact", "").strip()
+            address = request.POST.get("address", "").strip()
+            credit_raw = request.POST.get("credit") or "0"
 
-        Supplier.objects.create(
-            name=name,
-            contact=contact,
-            address=address,
-            credit=credit
-        )
-        return redirect("suppliers")  # reload page after saving
+            Supplier.objects.create(
+                name=name,
+                contact=contact,
+                address=address,
+                credit=decimal.Decimal(credit_raw) # Explicit cast for math safety
+            )
+            messages.success(request, f"Supplier entry '{name}' registered successfully!")
+        except Exception as e:
+            messages.error(request, f"Registry Error: Failed to add supplier vendor: {e}")
+        return redirect("suppliers")  
 
-    suppliers = Supplier.objects.all()
-    return render(request, "suppliers.html", {"suppliers": suppliers})
+    # GET Request: Renders the humanized, button-driven data grid table
+    suppliers_list = Supplier.objects.all().order_by('name')
+    return render(request, "suppliers.html", {"suppliers": suppliers_list})
+
+
+# 2. UPDATE EXISTING VENDOR METRICS
+@login_required(login_url='/')
+def edit_supplier(request, supplier_id):
+    supplier_obj = get_object_or_404(Supplier, id=supplier_id)
+    
+    if request.method == "POST":
+        try:
+            supplier_obj.name = request.POST.get('name', '').strip()
+            supplier_obj.contact = request.POST.get('contact', '').strip()
+            supplier_obj.address = request.POST.get('address', '').strip()
+            supplier_obj.credit = decimal.Decimal(request.POST.get('credit') or '0')
+            supplier_obj.save()
+            
+            messages.success(request, f"Supplier profile for '{supplier_obj.name}' updated successfully.")
+        except Exception as e:
+            messages.error(request, f"Database Write Error: Failed to save changes: {e}")
+            
+    return redirect('suppliers')
+
+
+# 3. DELETE VENDOR REGISTRY RECORD
+@login_required(login_url='/')
+def delete_supplier(request, supplier_id):
+    supplier_obj = get_object_or_404(Supplier, id=supplier_id)
+    name = supplier_obj.name
+    
+    # Financial Safeguard Rule: Prevents dropping vendors if open arrears persist
+    if supplier_obj.credit > 0:
+        messages.error(request, f"Accounting Security Lock: Cannot delete '{name}' because an outstanding debt of UGX {supplier_obj.credit:,.0f} must be cleared first.")
+        return redirect('suppliers')
+        
+    supplier_obj.delete()
+    messages.warning(request, f"Supplier registry for '{name}' has been wiped from indices.")
+    return redirect('suppliers')
 
 # customers under the credit scheme
 @login_required

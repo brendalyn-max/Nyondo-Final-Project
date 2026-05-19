@@ -163,43 +163,40 @@
     <!-- Main Left Global Navigation Panel -->
     <div class="sidebar">
       <h2>Nyondo General Hardware</h2>
-      
-      <!-- 🛠️ FIXED: Shifted wrapper layer parameters to allow automatic flex pinning for logout links -->
       <nav>
         {% if user.role == "ADMIN" %}
-        <a href="{% url 'admin_dashboard' %}"><i class="fas fa-user-shield"></i> Admin Dashboard</a>
-        <a href="{% url 'credit_scheme' %}"><i class="fas fa-piggy-bank"></i> Deposits</a>
-        <a href="{% url 'scheme_enrollees' %}"><i class="fas fa-users"></i> Credit Scheme List</a>
+        <a href="{% url 'admin_dashboard' %}"><i class="fas fa-user-shield"></i> Dashboard</a>
         <a href="{% url 'record_sale' %}"><i class="fas fa-receipt"></i> Record Sale</a>
-        <a href="{% url 'suppliers' %}"><i class="fas fa-truck"></i> Suppliers</a>
         <a href="{% url 'sales_today' %}"><i class="fas fa-chart-line"></i> Today's Sales</a>
+         <a href="{% url 'credit_scheme' %}"><i class="fas fa-piggy-bank"></i> Deposits</a>
+        <a href="{% url 'scheme_enrollees' %}"><i class="fas fa-users"></i> Credit Scheme List</a>
         <a href="{% url 'stock_list' %}"><i class="fas fa-clipboard-list"></i> Stock Inventory</a>
+        <a href="{% url 'suppliers' %}"><i class="fas fa-truck"></i> Suppliers</a>
         <a href="{% url 'reports' %}"><i class="fas fa-file-alt"></i> Reports</a>
         <a href="{% url 'user_management' %}"><i class="fas fa-users-cog"></i> User Management</a>
         
         {% elif user.role == "SALES" %}
-        <a href="{% url 'sales_dashboard' %}"><i class="fas fa-chart-line"></i> Sales Dashboard</a>
+        <a href="{% url 'sales_dashboard' %}"><i class="fas fa-chart-line"></i> Dashboard</a>
         <a href="{% url 'record_sale' %}"><i class="fas fa-receipt"></i> Record Sale</a>
         <a href="{% url 'credit_scheme' %}"><i class="fas fa-piggy-bank"></i> Deposits</a>
         <a href="{% url 'sales_today' %}"><i class="fas fa-chart-line"></i> Today's Sales</a>
         
         {% elif user.role == "STOCK" %}
-        <a href="{% url 'stock_dashboard' %}"><i class="fas fa-boxes"></i> Stock Dashboard</a>
+        <a href="{% url 'stock_dashboard' %}"><i class="fas fa-boxes"></i> Dashboard</a>
         <a href="{% url 'stock_list' %}"><i class="fas fa-clipboard-list"></i> Stock Inventory</a>
         <a href="{% url 'suppliers' %}"><i class="fas fa-truck"></i> Suppliers</a>
         
         {% elif user.role == "CASHIER" %}
-        <a href="{% url 'cashier_dashboard' %}"><i class="fas fa-cash-register"></i> Cashier Dashboard</a>
+        <a href="{% url 'cashier_dashboard' %}"><i class="fas fa-cash-register"></i> Dashboard</a>
         <a href="{% url 'credit_scheme' %}"><i class="fas fa-piggy-bank"></i> Deposits</a>
+        <a href="{% url 'scheme_enrollees' %}"><i class="fas fa-users"></i> Credit Scheme</a>
         <a href="{% url 'record_sale' %}"><i class="fas fa-receipt"></i> Record Sale</a>
         <a href="{% url 'sales_today' %}"><i class="fas fa-chart-line"></i> Today's Sales</a>
         <a href="{% url 'stock_list' %}"><i class="fas fa-clipboard-list"></i> Stock Inventory</a>
         <a href="{% url 'suppliers' %}"><i class="fas fa-truck"></i> Suppliers</a>
-        <a href="{% url 'scheme_enrollees' %}"><i class="fas fa-users"></i> Credit Scheme</a>
+        
         {% endif %}
       </nav>
-
-      <!-- Logout Component (Properly pinned at the bottom margin frame) -->
       <div class="logout">
         <a href="{% url 'logout' %}">
           <i class="fas fa-sign-out-alt"></i> Logout
@@ -207,7 +204,7 @@
       </div>
     </div>
 
-    <!-- Main Dynamic Interface Body Block -->
+    <!-- body content -->
     <div class="main-container">
       <div class="topbar">
         <span>
@@ -217,13 +214,10 @@
             {{ user.role|default:"Staff" }}
           </span>
         </span>
-        <!-- 🛠️ FIXED: Replaced 'today' token parameter hook with native server engine clock strings -->
         <span style="color: #7f8c8d; font-family: monospace; font-weight: bold;">
           <i class="far fa-calendar-alt" style="margin-right: 4px;"></i> {% now "D, d M Y" %}
         </span>
       </div>
-
-      <!-- Content Insertion Extension Point Layer -->
       <div class="content">
         {% block content %}{% endblock %}
       </div>

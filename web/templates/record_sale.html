@@ -25,7 +25,7 @@
         color: white;
     }
 
-    /* Core Panel Containers */
+    /* Containers */
     .sales-container {
         display: flex;
         gap: 20px;
@@ -40,7 +40,7 @@
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
 
-    /* Standardized Corporate Invoice Design */
+    /* Invoice Design */
     .receipt-panel {
         flex: 1.2;
         background: #fffdf7;
@@ -97,7 +97,7 @@
         border: 1px solid #f5c6cb;
     }
 
-    /* Receipt Typography Utility */
+    /* Receipt */
     .receipt-row {
         display: flex;
         justify-content: space-between;
@@ -117,7 +117,7 @@
     {% endfor %}
 {% endif %}
 
-<!-- Segment Navigation Options -->
+<!--  Navigation Options -->
 <div class="tab-nav">
     <a href="?type=WALK_IN" class="tab-link {% if active_tab == 'WALK_IN' %}active{% endif %}">Walk-In</a>
     <a href="?type=WHOLESALE" class="tab-link {% if active_tab == 'WHOLESALE' %}active{% endif %}">Wholesale</a>
@@ -194,7 +194,6 @@
         </form>
     </div>
 
-    <!-- 🧾 Standardized Corporate Invoice Ticket Box View -->
     <div class="receipt-panel">
         <h3 style="text-align:center; color:#0a1f44; margin-top:0; font-family: sans-serif; font-weight: 800; letter-spacing: 1px;">
             NYONDO GENERAL HARDWARE LTD

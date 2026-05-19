@@ -51,6 +51,8 @@ urlpatterns = [
     # Records
     # path('receipts/', views.receipts, name='receipts'),
     path('suppliers/', views.suppliers, name='suppliers'),
+    path('suppliers/edit/<int:supplier_id>/', views.edit_supplier, name='edit_supplier'),
+    path('suppliers/delete/<int:supplier_id>/', views.delete_supplier, name='delete_supplier'),
     path("scheme_enrollees/", views.scheme_enrollees, name="scheme_enrollees"),
     path("scheme_enrollees/edit/<int:pk>/", views.edit_enrollee, name="edit_enrollee"),
     path("scheme_enrollees/delete/<int:pk>/", views.delete_enrollee, name="delete_enrollee"),

@@ -248,7 +248,6 @@
             font-size: 0.95rem;
         }
 
-        /* System Functional Architecture Grid */
         .module-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -273,7 +272,6 @@
             line-height: 1.5;
         }
 
-        /* Workspace Authorization Permissive Grid (REPAIRED) */
         .roles-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -313,7 +311,7 @@
             line-height: 1.5;
         }
 
-        /* Clean System Baseline Footer */
+        /*  Footer */
         .footer {
             background-color: var(--dark);
             color: #94a3b8;
@@ -334,7 +332,7 @@
             color: #64748b;
         }
 
-        /* Pure CSS Login Modal Layout Elements */
+        /*  Login Modal */
         .modal {
             display: none;
             position: fixed;
@@ -392,13 +390,13 @@
 </head>
 <body>
 
-    <!-- Dynamic Enterprise Navigation Ribbon -->
+    <!-- Navigation -->
     <nav class="navbar">
         <div class="container">
             <div class="brand">
                 <div class="brand-logo">NH</div>
                 <div class="brand-title">
-                    <h1>Nyondo Stock</h1>
+                    <h1>NYONDO</h1>
                     <small>General Hardware LTD</small>
                 </div>
             </div>
@@ -410,7 +408,7 @@
         </div>
     </nav>
 
-    <!-- Structural Hero Panel Layout Block -->
+    <!-- Hero section -->
     <header class="hero">
         <div class="container">
             <div>
@@ -425,22 +423,22 @@
             
             <div class="metric-grid">
                 <div class="metric-card" style="border-top: 4px solid var(--primary);">
-                    <div class="metric-icon">📦</div>
+                    <div class="metric-icon"></div>
                     <h3>Stock Control</h3>
                     <p>Automated reorder triggers and price-margin structural guards.</p>
                 </div>
                 <div class="metric-card" style="border-top: 4px solid var(--accent);">
-                    <div class="metric-icon">💳</div>
+                    <div class="metric-icon"></div>
                     <h3>Credit Scheme</h3>
                     <p>Incremental milestone tracking for salary-earners.</p>
                 </div>
                 <div class="metric-card" style="border-top: 4px solid var(--primary-light);">
-                    <div class="metric-icon">📊</div>
+                    <div class="metric-icon"></div>
                     <h3>Sales Engine</h3>
                     <p>Instant billing ticket outputs and validation safeguards.</p>
                 </div>
                 <div class="metric-card" style="border-top: 4px solid #f59e0b;">
-                    <div class="metric-icon">🚚</div>
+                    <div class="metric-icon"></div>
                     <h3>Transport Module</h3>
                     <p>Automated logistical delivery fee distance calculations.</p>
                 </div>
@@ -448,7 +446,7 @@
         </div>
     </header>
 
-    <!-- Section 1: Core Functional Subsystem Architecture Module Panels -->
+    <!-- Subsystem Architecture Module  -->
     <section id="modules" class="section-padding bg-white-section">
         <div class="container">
             <div class="section-header">
@@ -472,7 +470,7 @@
         </div>
     </section>
 
-    <!-- Section 2: Workspace Access & Authorization Boundaries Grid Panels -->
+    <!--  Workspace Access & Authorization Boundaries Grid Panels -->
     <section id="roles" class="section-padding">
         <div class="container">
             <div class="section-header">
@@ -499,7 +497,7 @@
         </div>
     </section>
 
-    <!-- 🔐 Pure CSS Modal Login Panel Component (Zero JavaScript) -->
+    <!-- Modal Login Panel  -->
     <div id="loginModal" class="modal">
         <div class="login-box-content">
             <a href="#" style="position: absolute; right: 20px; top: 15px; font-size: 24px; font-weight: bold; color: #64748b;">&times;</a>
@@ -510,7 +508,7 @@
                 <p style="color: gray; font-size: 0.8rem; margin-top: 4px;">Enter authorization credentials to access dashboards</p>
             </div>
 
-            <!-- Global Action Feedback Notifications inside layout -->
+            <!-- Notifications inside layout -->
             {% if messages %}
                 <div style="margin-bottom: 15px; padding: 10px; background: #ffebee; color: #c62828; border-radius: 4px; font-size: 0.85rem; font-weight: bold; text-align: center;">
                     {% for message in messages %}{{ message }}{% endfor %}
@@ -532,7 +530,7 @@
         </div>
     </div>
 
-    <!-- Clean Corporate System Baseline Footer Ribbon -->
+    <!--Baseline Footer -->
     <footer class="footer">
         <div class="container">
             <p>&copy; 2026 Nyondo General Hardware LTD. All rights reserved.</p>

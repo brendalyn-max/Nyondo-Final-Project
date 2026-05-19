@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{%load humanize %}
+{% load humanize %}
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
@@ -76,6 +76,7 @@
     .panel h3 {
         margin-top: 0;
         color: #0a1f44;
+        margin-bottom: 15px;
     }
 
     .alert {
@@ -90,32 +91,47 @@
         color: #721c24;
     }
 
-    .sale-item {
-        padding: 10px 0;
+    .sale-item-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
         border-bottom: 1px solid #eee;
-        font-size: 14px;
     }
 
-    .sale-item:last-child {
+    .sale-item-wrapper:last-child {
         border-bottom: none;
+    }
+
+    .sale-meta small {
+        display: block;
+        color: #888;
+        font-size: 12px;
+        margin-top: 2px;
+    }
+
+    .sale-price {
+        font-weight: bold;
+        color: #0a1f44;
     }
 
 </style>
 
 <div class="dashboard">
-        <div class="dashboard-header">
-            <h1>Admin Dashboard</h1>
-            <p>Welcome back, {{ request.user.username }}! Here's an overview of today's performance.</p>
-        </div>
+    <div class="dashboard-header">
+        <h1>Admin Dashboard</h1>
+        <p>Welcome back, {{ request.user.username }}! Here's an overview of today's performance.</p>
+    </div>
+    
     <div class="stats">
         <div class="stat-box">
             <h3>Today's Revenue</h3>
-            <p>UGX {{ todays_revenue|floatformat:2 |intcomma }}</p>
+            <p>UGX {{ todays_revenue|floatformat:0|intcomma }}</p>
         </div>
 
         <div class="stat-box">
             <h3>Total Profit</h3>
-            <p>UGX {{ total_profit|floatformat:2 |intcomma }}</p>
+            <p>UGX {{ total_profit|floatformat:0|intcomma }}</p>
         </div>
 
         <div class="stat-box">
@@ -125,35 +141,40 @@
 
         <div class="stat-box">
             <h3>Supplier Debt</h3>
-            <p>UGX {{ supplier_debt|floatformat:2 |intcomma }}</p>
+            <p>UGX {{ supplier_debt|floatformat:0|intcomma }}</p>
         </div>
     </div>
 
-    
     <div class="actions">
         <a href="{% url 'record_sale' %}" class="btn btn-green">+ Record Sale</a>
         <a href="{% url 'sales_today' %}" class="btn btn-blue">Today's Sales</a>
         <a href="{% url 'stock_list' %}" class="btn btn-orange">Manage Stock</a>
     </div>
 
-
     <div class="grid">
 
-        <!-- RECENT SALES -->
+        <!-- RECENT SALES PANEL WITH EMPLOYEE AUDITING TRAILS -->
         <div class="panel">
             <h3>Recent Sales</h3>
 
             {% for sale in recent_sales %}
-                <div class="sale-item">
-                    <strong>REC-00{{ sale.id }}</strong> —
-                    {{ sale.item.name }} —
-                    UGX {{ sale.total_price|floatformat:2 |intcomma }}
+                <div class="sale-item-wrapper">
+                    <div class="sale-meta">
+                        <strong>REC-00{{ sale.id }}</strong> &mdash; {{ sale.item.name }}
+                        <small>
+                            {{ sale.user.username|default:"Admin User" }} &middot; {{ sale.date_sold|date:"n/j/Y" }}
+                        </small>
+                    </div>
+                    <div class="sale-price">
+                        UGX {{ sale.total_price|floatformat:0|intcomma }}
+                    </div>
                 </div>
             {% empty %}
-                <p>No sales recorded yet.</p>
+                <p class="text-muted">No sales recorded yet.</p>
             {% endfor %}
         </div>
 
+        <!-- ALERTS  -->
         <div class="panel">
             <h3>Alerts</h3>
 
@@ -166,14 +187,14 @@
             {% endif %}
 
             {% if out_of_stock_count > 0 %}
-<div class="alert alert-danger">
-    ⚠ {{ out_of_stock_count }} items are OUT OF STOCK
-</div>
-{% endif %}
+                <div class="alert alert-danger">
+                    ⚠ {{ out_of_stock_count }} items are OUT OF STOCK
+                </div>
+            {% endif %}
 
             {% if supplier_debt > 0 %}
                 <div class="alert alert-danger">
-                    ⚠ Supplier debt of UGX {{ supplier_debt|floatformat:2 |intcomma }}
+                    ⚠ Supplier debt of UGX {{ supplier_debt|floatformat:0|intcomma }}
                 </div>
             {% else %}
                 <p>No outstanding supplier debts </p>
@@ -181,13 +202,12 @@
 
              {% if recent_sales|length == 0 %}
                 <div class="alert alert-danger">
-                    ⚠ No sales recorded yet
+                    No sales recorded yet
                 </div>
             {% endif %}
         </div>
 
     </div>
-
 </div>
 
 {% endblock %}
